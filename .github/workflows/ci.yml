@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    env:
+      GOCACHE: ${{ github.workspace }}/.cache/go-build
+      GOMODCACHE: ${{ github.workspace }}/.cache/go-mod
+    steps:
+      - name: Install system dependencies
+        run: pacman -Syu --noconfirm --needed go git base-devel gcc pkgconf gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell gobject-introspection
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/go-build
+            .cache/go-mod
+          key: archlinux-go-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            archlinux-go-
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Build
+        run: go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
+
+      - name: Run tests
+        run: go test -mod=mod ./...
