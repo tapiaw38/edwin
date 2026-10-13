@@ -204,9 +204,8 @@ func loadFileBufferLocked() {
 }
 
 func saveFileBufferLocked() {
-	os.MkdirAll(filepath.Dir(fileBufferPath()), 0755)
 	data, _ := json.Marshal(fileBuffer)
-	os.WriteFile(fileBufferPath(), data, 0644)
+	_ = config.AtomicWrite(fileBufferPath(), data, 0644)
 }
 
 func bufferSummary(count int) string {

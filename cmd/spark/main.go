@@ -61,7 +61,10 @@ func runWindow(show func()) {
 }
 
 func runSetup() {
-	config.Load()
+	if err := config.Load(); err != nil {
+		os.Stderr.WriteString("Invalid config: " + err.Error() + "\n")
+		os.Exit(1)
+	}
 	sparkPath, _ := os.Executable()
 	if err := config.SetupHotkey(sparkPath); err != nil {
 		os.Stderr.WriteString("Failed to setup hotkey: " + err.Error() + "\n")

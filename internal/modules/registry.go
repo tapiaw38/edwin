@@ -94,7 +94,7 @@ func DefaultAsyncSearchers() []AsyncSearcher {
 			Name:    "youtube",
 			Match:   IsYouTubeQuery,
 			Loading: YouTubeLoading,
-			Search:  func(_ context.Context, q string) []Result { return YouTubeSearch(q) },
+			Search:  YouTubeSearchContext,
 		},
 		{
 			Name:     "file",
@@ -108,19 +108,19 @@ func DefaultAsyncSearchers() []AsyncSearcher {
 			Name:    "weather",
 			Match:   IsWeatherQuery,
 			Loading: WeatherLoading,
-			Search:  func(_ context.Context, q string) []Result { return WeatherSearchAsync(q) },
+			Search:  WeatherSearchContext,
 		},
 		{
 			Name:    "navigation",
 			Match:   IsNavQuery,
 			Loading: NavigationLoading,
-			Search:  func(_ context.Context, q string) []Result { return NavigationSearch(q) },
+			Search:  NavigationSearchContext,
 		},
 		{
 			Name:    "destination-picker",
 			Match:   IsPickQuery,
 			Loading: NavigationLoading,
-			Search:  func(_ context.Context, q string) []Result { return DestinationPickerSearch(q) },
+			Search:  DestinationPickerSearchContext,
 		},
 	}
 }

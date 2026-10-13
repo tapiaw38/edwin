@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -29,11 +30,15 @@ func WeatherLoading(query string) []Result {
 }
 
 func WeatherSearchAsync(query string) []Result {
+	return WeatherSearchContext(context.Background(), query)
+}
+
+func WeatherSearchContext(ctx context.Context, query string) []Result {
 	if !IsWeatherQuery(query) {
 		return nil
 	}
 	page := weatherPage(query)
-	text, err := currentWeather(page)
+	text, err := currentWeather(ctx, page)
 	if err != nil {
 		return weatherResult(query, "Weather unavailable; press Enter to open wttr.in", false)
 	}
@@ -95,9 +100,13 @@ func titleCity(city string) string {
 	return strings.Join(parts, " ")
 }
 
-func currentWeather(page string) (string, error) {
+func currentWeather(ctx context.Context, page string) (string, error) {
 	client := http.Client{Timeout: 8 * time.Second}
-	resp, err := client.Get(page + "?format=3")
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, page+"?format=3", nil)
+	if err != nil {
+		return "", err
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}

@@ -41,6 +41,10 @@ func IsYouTubeQuery(query string) bool {
 }
 
 func YouTubeSearch(query string) []Result {
+	return YouTubeSearchContext(context.Background(), query)
+}
+
+func YouTubeSearchContext(parent context.Context, query string) []Result {
 	searchQuery := strings.TrimSpace(query)
 	for _, prefix := range []string{"youtube ", "yt "} {
 		if strings.HasPrefix(strings.ToLower(searchQuery), prefix) {
@@ -56,7 +60,7 @@ func YouTubeSearch(query string) []Result {
 		return []Result{youtubeFallback("YouTube: "+searchQuery, "Install yt-dlp for video previews", youtubeSearchURL(searchQuery))}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), YouTubeSearchTimeout)
+	ctx, cancel := context.WithTimeout(parent, YouTubeSearchTimeout)
 	defer cancel()
 
 	cmd := commands.CommandContext(ctx, "yt-dlp", "--ignore-config", "--no-warnings", "--dump-json", "--flat-playlist", fmt.Sprintf("ytsearch%d:%s", maxYouTubeResults, searchQuery))

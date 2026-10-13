@@ -531,9 +531,13 @@ func executeAppAction(action modules.ActionSpec) bool {
 	if len(action.Args) == 0 {
 		return false
 	}
-	app := apps.App{Name: action.Target, Exec: action.Args[0]}
+	app := apps.App{Name: action.Target}
+	if len(action.Args) > 0 {
+		app.Icon = action.Args[0]
+	}
 	if len(action.Args) > 1 {
-		app.Icon = action.Args[1]
+		app.ExecArgs = append([]string(nil), action.Args[1:]...)
+		app.Exec = strings.Join(app.ExecArgs, " ")
 	}
 	history.Record(app.Name)
 	if err := apps.Launch(app); err != nil {

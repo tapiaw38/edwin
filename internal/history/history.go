@@ -3,7 +3,6 @@ package history
 import (
 	"encoding/json"
 	"os"
-	"path/filepath"
 
 	"github.com/tapiaw38/spark/internal/config"
 )
@@ -26,9 +25,8 @@ func load() {
 }
 
 func save() {
-	os.MkdirAll(filepath.Dir(historyPath), 0755)
 	data, _ := json.Marshal(counts)
-	os.WriteFile(historyPath, data, 0644)
+	_ = config.AtomicWrite(historyPath, data, 0644)
 }
 
 func Record(appName string) {

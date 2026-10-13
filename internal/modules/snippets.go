@@ -3,7 +3,6 @@ package modules
 import (
 	"encoding/json"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -41,9 +40,8 @@ func loadSnippets() {
 }
 
 func saveSnippets() {
-	os.MkdirAll(filepath.Dir(snippetsPath), 0755)
 	data, _ := json.MarshalIndent(snippets, "", "  ")
-	os.WriteFile(snippetsPath, data, 0644)
+	_ = config.AtomicWrite(snippetsPath, data, 0644)
 }
 
 func SnippetSearch(query string) []Result {

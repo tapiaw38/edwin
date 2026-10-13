@@ -38,7 +38,7 @@ func appSearch(query string) []modules.Result {
 			Type:       modules.TypeApp,
 			Title:      app.Name,
 			Icon:       app.Icon,
-			ActionSpec: modules.AppAction(app.Name, app.Exec, app.Icon),
+			ActionSpec: modules.AppActionArgs(app.Name, app.ExecArgs, app.Icon),
 		})
 	}
 	return out

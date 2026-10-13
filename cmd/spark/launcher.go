@@ -30,7 +30,9 @@ const (
 
 func runLauncher() {
 	gtk.Init()
-	config.Load()
+	if err := config.Load(); err != nil {
+		os.Stderr.WriteString("Spark config invalid: " + err.Error() + "\n")
+	}
 
 	allApps = apps.Load()
 	initSearch()

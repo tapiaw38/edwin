@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sort"
@@ -21,6 +22,15 @@ func NavigationLoading(query string) []Result {
 }
 
 func NavigationSearch(query string) []Result {
+	return NavigationSearchContext(context.Background(), query)
+}
+
+func NavigationSearchContext(ctx context.Context, query string) []Result {
+	select {
+	case <-ctx.Done():
+		return nil
+	default:
+	}
 	q := strings.TrimSpace(query)
 	lower := strings.ToLower(q)
 	if !IsNavQuery(query) {
@@ -48,6 +58,15 @@ func IsPickQuery(query string) bool {
 }
 
 func DestinationPickerSearch(query string) []Result {
+	return DestinationPickerSearchContext(context.Background(), query)
+}
+
+func DestinationPickerSearchContext(ctx context.Context, query string) []Result {
+	select {
+	case <-ctx.Done():
+		return nil
+	default:
+	}
 	q := strings.TrimSpace(query)
 	lower := strings.ToLower(q)
 	if !IsPickQuery(query) {

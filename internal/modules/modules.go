@@ -200,6 +200,11 @@ func AppAction(name, exec, icon string) ActionSpec {
 	return ActionSpec{Kind: ActionApp, Target: name, Args: []string{exec, icon}}
 }
 
+func AppActionArgs(name string, args []string, icon string) ActionSpec {
+	copyArgs := append([]string(nil), args...)
+	return ActionSpec{Kind: ActionApp, Target: name, Args: append([]string{icon}, copyArgs...)}
+}
+
 func (a ActionSpec) WithStatus(status string) ActionSpec {
 	a.SuccessStatus = status
 	return a

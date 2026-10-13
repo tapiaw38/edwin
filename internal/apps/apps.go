@@ -12,9 +12,10 @@ import (
 )
 
 type App struct {
-	Name string
-	Exec string
-	Icon string
+	Name     string
+	Exec     string // Display/backward-compatible representation.
+	ExecArgs []string
+	Icon     string
 }
 
 const quickSearchResultLimit = 6
@@ -94,7 +95,8 @@ func parseDesktop(path string) (App, bool) {
 		if strings.HasPrefix(line, "Name=") && app.Name == "" {
 			app.Name = strings.TrimPrefix(line, "Name=")
 		} else if strings.HasPrefix(line, "Exec=") {
-			app.Exec = cleanDesktopExec(strings.TrimPrefix(line, "Exec="))
+			app.ExecArgs = parseDesktopExec(strings.TrimPrefix(line, "Exec="))
+			app.Exec = strings.Join(app.ExecArgs, " ")
 		} else if strings.HasPrefix(line, "Icon=") {
 			app.Icon = strings.TrimPrefix(line, "Icon=")
 		} else if strings.HasPrefix(line, "NoDisplay=true") {
@@ -109,15 +111,60 @@ func parseDesktop(path string) (App, bool) {
 }
 
 func cleanDesktopExec(execCmd string) string {
-	fields := strings.Fields(execCmd)
-	clean := fields[:0]
-	for _, field := range fields {
-		if strings.HasPrefix(field, "%") || strings.HasPrefix(field, "@@") {
+	return strings.Join(parseDesktopExec(execCmd), " ")
+}
+
+// parseDesktopExec handles quoting and removes field codes because Spark
+// launches applications without file/URI arguments.
+func parseDesktopExec(command string) []string {
+	var args []string
+	var current strings.Builder
+	quoted := rune(0)
+	escaped := false
+	flush := func() {
+		if current.Len() > 0 {
+			args = append(args, current.String())
+			current.Reset()
+		}
+	}
+	for _, r := range command {
+		if escaped {
+			current.WriteRune(r)
+			escaped = false
 			continue
 		}
-		clean = append(clean, field)
+		if r == '\\' && quoted != '\'' {
+			escaped = true
+			continue
+		}
+		if quoted != 0 {
+			if r == quoted {
+				quoted = 0
+			} else {
+				current.WriteRune(r)
+			}
+			continue
+		}
+		if r == '\'' || r == '"' {
+			quoted = r
+		} else if r == ' ' || r == '\t' {
+			flush()
+		} else {
+			current.WriteRune(r)
+		}
 	}
-	return strings.Join(clean, " ")
+	if escaped {
+		current.WriteByte('\\')
+	}
+	flush()
+	clean := args[:0]
+	for _, arg := range args {
+		if strings.HasPrefix(arg, "%") || strings.HasPrefix(arg, "@@") {
+			continue
+		}
+		clean = append(clean, arg)
+	}
+	return clean
 }
 
 type scoredApp struct {
@@ -237,7 +284,13 @@ func fuzzyScore(name, query string) int {
 }
 
 func Launch(app App) error {
-	parts := strings.Fields(app.Exec)
+	parts := app.ExecArgs
+	if len(parts) == 0 {
+		parts = parseDesktopExec(app.Exec)
+	}
+	if len(parts) == 0 {
+		return os.ErrInvalid
+	}
 	cmd := commands.Command(parts[0], parts[1:]...)
 	cmd.Stdin = nil
 	cmd.Stdout = nil

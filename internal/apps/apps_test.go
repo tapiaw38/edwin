@@ -29,6 +29,14 @@ func TestCleanDesktopExecRemovesDesktopFieldCodes(t *testing.T) {
 	}
 }
 
+func TestParseDesktopExecPreservesQuotedArguments(t *testing.T) {
+	got := parseDesktopExec(`/usr/bin/example --title "My App" --path '/tmp/a b' %U`)
+	want := []string{"/usr/bin/example", "--title", "My App", "--path", "/tmp/a b"}
+	if strings.Join(got, "\x00") != strings.Join(want, "\x00") {
+		t.Fatalf("got %#v, want %#v", got, want)
+	}
+}
+
 func TestLoadFindsFlatpakSlackWhenInstalled(t *testing.T) {
 	if _, err := os.Stat("/var/lib/flatpak/exports/share/applications/com.slack.Slack.desktop"); err != nil {
 		t.Skip("Slack flatpak desktop file not installed")

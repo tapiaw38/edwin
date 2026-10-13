@@ -1,7 +1,9 @@
 package modules
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -19,6 +21,7 @@ type fileUndo struct {
 	Kind   string `json:"kind"`
 	Source string `json:"source"`
 	Target string `json:"target"`
+	Digest string `json:"digest,omitempty"`
 }
 
 func FileOperationSearch(query string) []Result {
@@ -102,7 +105,12 @@ func RunFileOperation(op, source, target string) {
 		}
 	case "copy":
 		if err := copyPath(src, dst); err == nil {
-			saveUndo(fileUndo{Title: "Copy File", Kind: "delete", Source: dst})
+			digest, digestErr := pathDigest(dst)
+			if digestErr != nil {
+				SetStatus(false, "Copy File undo tracking failed: "+digestErr.Error())
+				return
+			}
+			saveUndo(fileUndo{Title: "Copy File", Kind: "delete", Source: dst, Digest: digest})
 			SetStatus(true, "Copy File: "+shortenPath(src)+" -> "+shortenPath(dst))
 		} else {
 			SetStatus(false, "Copy File failed: "+err.Error())
@@ -132,9 +140,10 @@ func currentFileUndo() *fileUndo {
 
 func saveUndo(undo fileUndo) {
 	lastFileUndo = &undo
-	os.MkdirAll(filepath.Dir(fileUndoPath()), 0755)
-	data, _ := json.Marshal(undo)
-	os.WriteFile(fileUndoPath(), data, 0644)
+	data, err := json.Marshal(undo)
+	if err == nil {
+		_ = config.AtomicWrite(fileUndoPath(), data, 0600)
+	}
 }
 
 func clearUndo() {
@@ -158,6 +167,15 @@ func runUndo(undo *fileUndo) {
 			SetStatus(true, "Undo: "+undo.Title)
 		}
 	case "delete":
+		if undo.Digest == "" {
+			SetStatus(false, "Undo refused: old copy has no safety fingerprint")
+			return
+		}
+		current, err := pathDigest(undo.Source)
+		if err != nil || current != undo.Digest {
+			SetStatus(false, "Undo refused: destination changed")
+			return
+		}
 		if err := os.RemoveAll(undo.Source); err != nil {
 			SetStatus(false, "Undo failed: "+err.Error())
 		} else {
@@ -172,6 +190,57 @@ func runUndo(undo *fileUndo) {
 			}
 		}
 	}
+}
+
+func pathDigest(path string) (string, error) {
+	h := sha256.New()
+	info, err := os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+	if !info.IsDir() {
+		fmt.Fprintf(h, "%s|%o|%d|%d|", filepath.Base(path), info.Mode(), info.Size(), info.ModTime().UnixNano())
+		file, err := os.Open(path)
+		if err != nil {
+			return "", err
+		}
+		if _, err := io.Copy(h, file); err != nil {
+			file.Close()
+			return "", err
+		}
+		if err := file.Close(); err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%x", h.Sum(nil)), nil
+	}
+	err = filepath.Walk(path, func(current string, info os.FileInfo, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		rel, err := filepath.Rel(path, current)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(h, "%s|%o|%d|%d\n", rel, info.Mode(), info.Size(), info.ModTime().UnixNano())
+		if info.Mode().IsRegular() {
+			file, err := os.Open(current)
+			if err != nil {
+				return err
+			}
+			if _, err := io.Copy(h, file); err != nil {
+				file.Close()
+				return err
+			}
+			if err := file.Close(); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }
 
 func RunLastFileUndo() {

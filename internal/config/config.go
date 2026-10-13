@@ -71,16 +71,19 @@ func Load() error {
 		return Save()
 	}
 
-	if err := yaml.Unmarshal(data, &Current); err != nil {
+	loaded := defaultConfig
+	if err := yaml.Unmarshal(data, &loaded); err != nil {
 		return err
 	}
-
+	Current = loaded
 	return nil
 }
 
 func Save() error {
 	configDir := ConfigDir()
-	os.MkdirAll(configDir, 0755)
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		return err
+	}
 
 	configPath := filepath.Join(configDir, "config.yaml")
 
@@ -89,7 +92,43 @@ func Save() error {
 		return err
 	}
 
-	return os.WriteFile(configPath, data, 0644)
+	return AtomicWrite(configPath, data, 0644)
+}
+
+// AtomicWrite prevents readers from observing partially-written state files.
+func AtomicWrite(path string, data []byte, mode os.FileMode) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+	tmpFile, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+".tmp-*")
+	if err != nil {
+		return err
+	}
+	tmp := tmpFile.Name()
+	if err := tmpFile.Chmod(mode); err != nil {
+		tmpFile.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if _, err := tmpFile.Write(data); err != nil {
+		tmpFile.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := tmpFile.Sync(); err != nil {
+		tmpFile.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := tmpFile.Close(); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return nil
 }
 
 func SetupHotkey(sparkPath string) error {
@@ -99,7 +138,7 @@ func SetupHotkey(sparkPath string) error {
 	data, err := os.ReadFile(bindPath)
 	if err != nil {
 		os.MkdirAll(filepath.Dir(bindPath), 0755)
-		return os.WriteFile(bindPath, []byte(bindLine+"\n"), 0644)
+		return AtomicWrite(bindPath, []byte(bindLine+"\n"), 0644)
 	}
 
 	content := string(data)
@@ -121,7 +160,7 @@ func SetupHotkey(sparkPath string) error {
 		newLines = append(newLines, bindLine)
 	}
 
-	return os.WriteFile(bindPath, []byte(joinLines(newLines)), 0644)
+	return AtomicWrite(bindPath, []byte(joinLines(newLines)), 0644)
 }
 
 func splitLines(s string) []string {

@@ -2,6 +2,7 @@ package modules
 
 import (
 	"archive/zip"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -95,31 +96,28 @@ func SyncSearch(query string) []Result {
 }
 
 func WriteSyncScript(path, configDir, dataDir string) error {
-	os.MkdirAll(filepath.Dir(path), 0755)
 	content := "#!/bin/sh\nset -eu\nfor dir in '" + configDir + "' '" + dataDir + "'; do\n  mkdir -p \"$dir\"\n  cd \"$dir\"\n  if [ ! -d .git ]; then git init; fi\n  git add .\n  git commit -m 'sync spark settings' || true\ndone\n"
-	if err := os.WriteFile(path, []byte(content), 0755); err != nil {
+	if err := config.AtomicWrite(path, []byte(content), 0755); err != nil {
 		return err
 	}
 	return nil
 }
 
 func WriteSyncProfile(path, configDir, dataDir string) error {
-	os.MkdirAll(filepath.Dir(path), 0755)
 	paths := configDir + "\n" + dataDir
 	content := "Spark sync paths:\n" + paths + "\n\nSyncthing:\n- Add both folders as send/receive folders.\n- Keep ignore patterns for cache files.\n\nGit:\ncd " + configDir + "\ngit init\ngit add .\ngit commit -m 'sync spark config'\n\nData:\ncd " + dataDir + "\ngit init\ngit add .\ngit commit -m 'sync spark data'\n"
-	return os.WriteFile(path, []byte(content), 0644)
+	return config.AtomicWrite(path, []byte(content), 0644)
 }
 
 func ExportSyncZip(target string, paths []string) error {
-	os.MkdirAll(filepath.Dir(target), 0755)
-	out, err := os.Create(target)
+	tmp := target + ".tmp-" + fmt.Sprint(os.Getpid())
+	out, err := os.Create(tmp)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer os.Remove(tmp)
 
 	writer := zip.NewWriter(out)
-	defer writer.Close()
 
 	for _, root := range paths {
 		filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
@@ -149,7 +147,14 @@ func ExportSyncZip(target string, paths []string) error {
 			return nil
 		})
 	}
-	return nil
+	if err := writer.Close(); err != nil {
+		out.Close()
+		return err
+	}
+	if err := out.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmp, target)
 }
 
 func ImportSyncZip(source, home string) error {
@@ -161,7 +166,8 @@ func ImportSyncZip(source, home string) error {
 
 	for _, file := range reader.File {
 		target := filepath.Clean(filepath.Join(home, file.Name))
-		if !strings.HasPrefix(target, home) {
+		rel, err := filepath.Rel(home, target)
+		if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 			continue
 		}
 		if file.FileInfo().IsDir() {
@@ -173,15 +179,17 @@ func ImportSyncZip(source, home string) error {
 		if err != nil {
 			continue
 		}
-		out, err := os.Create(target)
+		data, err := io.ReadAll(rc)
+		rc.Close()
 		if err != nil {
-			rc.Close()
 			continue
 		}
-		io.Copy(out, rc)
-		out.Close()
-		rc.Close()
-		os.Chmod(target, file.FileInfo().Mode())
+		if err := config.AtomicWrite(target, data, file.FileInfo().Mode()); err != nil {
+			continue
+		}
+		if err := os.Chmod(target, file.FileInfo().Mode()); err != nil {
+			continue
+		}
 	}
 	return nil
 }
