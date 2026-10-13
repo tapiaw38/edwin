@@ -21,22 +21,35 @@ type App struct {
 const quickSearchResultLimit = 6
 
 func Load() []App {
+	return loadFromDirs(applicationDirs())
+}
+
+func loadFromDirs(dirs []string) []App {
 	var apps []App
-	dirs := applicationDirs()
+	seenIDs := make(map[string]struct{})
 
 	for _, dir := range dirs {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			continue
-		}
-		for _, e := range entries {
-			if !strings.HasSuffix(e.Name(), ".desktop") {
-				continue
+		_ = filepath.WalkDir(dir, func(path string, entry os.DirEntry, err error) error {
+			if err != nil {
+				return nil
 			}
-			if app, ok := parseDesktop(filepath.Join(dir, e.Name())); ok {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".desktop") {
+				return nil
+			}
+			relative, err := filepath.Rel(dir, path)
+			if err != nil {
+				return nil
+			}
+			id := strings.ReplaceAll(filepath.ToSlash(relative), "/", "-")
+			if _, exists := seenIDs[id]; exists {
+				return nil
+			}
+			seenIDs[id] = struct{}{}
+			if app, ok := parseDesktop(path); ok {
 				apps = append(apps, app)
 			}
-		}
+			return nil
+		})
 	}
 	return apps
 }

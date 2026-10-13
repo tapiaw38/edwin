@@ -2,6 +2,7 @@ package apps
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -34,6 +35,35 @@ func TestParseDesktopExecPreservesQuotedArguments(t *testing.T) {
 	want := []string{"/usr/bin/example", "--title", "My App", "--path", "/tmp/a b"}
 	if strings.Join(got, "\x00") != strings.Join(want, "\x00") {
 		t.Fatalf("got %#v, want %#v", got, want)
+	}
+}
+
+func TestLoadFromDirsDeduplicatesDesktopFileIDsByPriority(t *testing.T) {
+	root := t.TempDir()
+	userDir := filepath.Join(root, "user", "applications")
+	systemDir := filepath.Join(root, "system", "applications")
+	writeDesktop := func(dir, relativePath, name string) {
+		t.Helper()
+		path := filepath.Join(dir, relativePath)
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		content := "[Desktop Entry]\nName=" + name + "\nExec=" + strings.ToLower(name) + "\n"
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeDesktop(userDir, "code.desktop", "User VS Code")
+	writeDesktop(systemDir, "code.desktop", "System VS Code")
+	writeDesktop(userDir, "kde/app.desktop", "Nested User App")
+	writeDesktop(systemDir, "kde-app.desktop", "Nested System App")
+
+	got := loadFromDirs([]string{userDir, systemDir})
+	if len(got) != 2 {
+		t.Fatalf("loaded %d apps, want 2: %#v", len(got), got)
+	}
+	if got[0].Name != "User VS Code" || got[1].Name != "Nested User App" {
+		t.Fatalf("loaded apps %#v, want user entries for both desktop-file-IDs", got)
 	}
 }
 
