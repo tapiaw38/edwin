@@ -182,12 +182,15 @@ margin_top: 100
 history_boost: 3
 hotkey: "SUPER,s"
 spell_language: "en"
+file_manager: "ghostty -e spf"
 web_shortcuts:
   g:
     name: Google
     url: "https://www.google.com/search?q=%s"
     icon: web-browser
 ```
+
+`file_manager` is optional. Edwin appends the folder path to this command when revealing a file; when unset, it uses `xdg-open`.
 
 ## Key Files to Modify
 

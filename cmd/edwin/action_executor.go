@@ -78,11 +78,20 @@ func openPaths(paths []string) bool {
 		if path == "" {
 			continue
 		}
-		if !startCommand("xdg-open", path) {
+		if !openPath(path) {
 			ok = false
 		}
 	}
 	return ok
+}
+
+func openPath(path string) bool {
+	if len(strings.Fields(config.Current.FileManager)) > 0 {
+		if info, err := os.Stat(path); err == nil && info.IsDir() {
+			return openFolder(path)
+		}
+	}
+	return startCommand("xdg-open", path)
 }
 
 func startCommand(name string, args ...string) bool {
@@ -95,6 +104,19 @@ func startCommand(name string, args ...string) bool {
 		_ = cmd.Wait()
 	}()
 	return true
+}
+
+func openFolder(path string) bool {
+	name, args := fileManagerCommand(config.Current.FileManager, path)
+	return startCommand(name, args...)
+}
+
+func fileManagerCommand(fileManager, path string) (string, []string) {
+	args := strings.Fields(fileManager)
+	if len(args) == 0 {
+		return "xdg-open", []string{path}
+	}
+	return args[0], append(args[1:], path)
 }
 
 func runCommand(name string, args ...string) bool {
@@ -245,11 +267,14 @@ func executeFileAction(action modules.ActionSpec) bool {
 }
 
 func revealFile(path string) bool {
+	if len(strings.Fields(config.Current.FileManager)) > 0 {
+		return openFolder(filepath.Dir(path))
+	}
 	if _, err := cmdrunner.LookPath("dbus-send"); err == nil {
 		uri := (&url.URL{Scheme: "file", Path: filepath.ToSlash(path)}).String()
 		return startCommand("dbus-send", "--session", "--dest=org.freedesktop.FileManager1", "--type=method_call", "/org/freedesktop/FileManager1", "org.freedesktop.FileManager1.ShowItems", "array:string:"+uri, "string:")
 	}
-	return startCommand("xdg-open", filepath.Dir(path))
+	return openFolder(filepath.Dir(path))
 }
 
 func moveToTrash(path string) bool {

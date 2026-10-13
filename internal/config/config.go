@@ -29,7 +29,8 @@ type Config struct {
 	HistoryBoost  int    `yaml:"history_boost"`
 	SpellLanguage string `yaml:"spell_language"`
 
-	Hotkey string `yaml:"hotkey"`
+	Hotkey      string `yaml:"hotkey"`
+	FileManager string `yaml:"file_manager"`
 }
 
 type WebShortcut struct {

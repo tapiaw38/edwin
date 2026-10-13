@@ -1,10 +1,30 @@
 package main
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/tapiaw38/edwin/internal/modules"
 )
+
+func TestFileManagerCommandArgs(t *testing.T) {
+	tests := []struct {
+		fileManager string
+		path        string
+		name        string
+		args        []string
+	}{
+		{fileManager: "", path: "/tmp/folder", name: "xdg-open", args: []string{"/tmp/folder"}},
+		{fileManager: "ghostty -e spf", path: "/tmp/folder", name: "ghostty", args: []string{"-e", "spf", "/tmp/folder"}},
+		{fileManager: "   ", path: "/tmp/folder", name: "xdg-open", args: []string{"/tmp/folder"}},
+	}
+	for _, test := range tests {
+		name, args := fileManagerCommand(test.fileManager, test.path)
+		if name != test.name || !reflect.DeepEqual(args, test.args) {
+			t.Errorf("fileManagerCommand(%q, %q) = %q, %v; want %q, %v", test.fileManager, test.path, name, args, test.name, test.args)
+		}
+	}
+}
 
 func TestEveryActionKindHasHandler(t *testing.T) {
 	for _, kind := range modules.AllActionKinds() {
