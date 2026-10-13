@@ -42,6 +42,7 @@ func FileActions(path string) []Result {
 			Title:      "Copy Path",
 			Desc:       path,
 			Icon:       "edit-copy",
+			KeepOpen:   true,
 			ActionSpec: CopyAction(path),
 		},
 		{
@@ -49,6 +50,7 @@ func FileActions(path string) []Result {
 			Title:      "Rename...",
 			Desc:       "Edit name in file operation window",
 			Icon:       "edit-rename",
+			KeepOpen:   true,
 			ActionSpec: FileAction("op-window", "rename", path, filepath.Base(path)),
 		},
 		{
@@ -56,6 +58,7 @@ func FileActions(path string) []Result {
 			Title:      "Copy To...",
 			Desc:       "Choose destination in file operation window",
 			Icon:       "edit-copy",
+			KeepOpen:   true,
 			ActionSpec: FileAction("op-window", "copy", path, filepath.Dir(path)),
 		},
 		{
@@ -63,6 +66,7 @@ func FileActions(path string) []Result {
 			Title:      "Move To...",
 			Desc:       "Choose destination in file operation window",
 			Icon:       "go-jump",
+			KeepOpen:   true,
 			ActionSpec: FileAction("op-window", "move", path, filepath.Dir(path)),
 		},
 		{
@@ -86,6 +90,7 @@ func FileActions(path string) []Result {
 			Desc:       path,
 			Icon:       "user-trash",
 			Confirm:    true,
+			KeepOpen:   true,
 			ActionSpec: FileAction("trash", path),
 		},
 	}

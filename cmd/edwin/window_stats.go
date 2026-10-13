@@ -65,9 +65,8 @@ func showStatsWindow() {
 
 	window.Add(box)
 	window.Connect("key-press-event", func(_ *gtk.Window, _ *gdk.Event) bool {
-		gtk.MainQuit()
+		window.Destroy()
 		return true
 	})
-	window.Connect("destroy", func() { gtk.MainQuit() })
 	window.ShowAll()
 }

@@ -56,7 +56,7 @@ func showEmailWindow(toValue, subjectValue, bodyValue string) {
 		subject := subjectEntry.Text()
 		body := bodyEntry.Text()
 		executeActionSpec(modules.EmailAction(to, subject, body, splitPaths(attachmentsEntry.Text())...))
-		gtk.MainQuit()
+		window.Destroy()
 	})
 	buttons.PackStart(bufferBtn, false, false, 0)
 	buttons.PackStart(chooseBtn, false, false, 0)
@@ -68,7 +68,6 @@ func showEmailWindow(toValue, subjectValue, bodyValue string) {
 	box.PackStart(attachmentsEntry, false, false, 0)
 	box.PackStart(buttons, false, false, 0)
 	window.Add(box)
-	window.Connect("destroy", func() { gtk.MainQuit() })
 	window.ShowAll()
 	toEntry.GrabFocus()
 }

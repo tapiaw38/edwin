@@ -75,7 +75,7 @@ func scrollToRow(row *gtk.ListBoxRow) {
 	}
 }
 
-func executeSelected() {
+func executeSelected(window *gtk.Window) {
 	if inSpotifyMode && spotifyList != nil {
 		executePlayerControl()
 		return
@@ -97,7 +97,7 @@ func executeSelected() {
 	}
 	executeActionSpec(r.ActionSpec)
 	if !r.KeepOpen {
-		gtk.MainQuit()
+		window.Hide()
 		return
 	}
 	if inActionMode {
@@ -119,7 +119,7 @@ func executePlayerControl() {
 }
 
 func confirmAction(r modules.Result) bool {
-	dialog := gtk.NewMessageDialog(nil, gtk.DialogModal, gtk.MessageWarning, gtk.ButtonsOKCancel)
+	dialog := gtk.NewMessageDialog(mainWindow, gtk.DialogModal, gtk.MessageWarning, gtk.ButtonsOKCancel)
 	dialog.SetMarkup("<b>" + r.Title + "</b>\n" + r.Desc)
 	dialog.ShowAll()
 	response := dialog.Run()

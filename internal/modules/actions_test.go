@@ -42,6 +42,34 @@ func TestActionSpecIsZero(t *testing.T) {
 	}
 }
 
+func TestFileActionsKeepLauncherOpenForFileManagement(t *testing.T) {
+	keepOpen := map[string]bool{
+		"Open":            false,
+		"Reveal in Files": false,
+		"Copy Path":       true,
+		"Rename...":       true,
+		"Copy To...":      true,
+		"Move To...":      true,
+		"Add to Buffer":   true,
+		"Email File":      false,
+		"Move to Trash":   true,
+	}
+	for _, action := range FileActions("/tmp/file.txt") {
+		want, ok := keepOpen[action.Title]
+		if !ok {
+			t.Errorf("unexpected file action %q", action.Title)
+			continue
+		}
+		if action.KeepOpen != want {
+			t.Errorf("%q KeepOpen = %t, want %t", action.Title, action.KeepOpen, want)
+		}
+		delete(keepOpen, action.Title)
+	}
+	for title := range keepOpen {
+		t.Errorf("missing file action %q", title)
+	}
+}
+
 func TestActionSpecWithStatus(t *testing.T) {
 	action := StartAction("sh", "-c", "true").WithStatus("done")
 	if action.SuccessStatus != "done" {

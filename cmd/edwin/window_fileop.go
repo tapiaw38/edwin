@@ -184,11 +184,11 @@ func showFileOpWindow(op, sourceValue, targetValue string) {
 		}()
 	})
 	cancelBtn := gtk.NewButtonWithLabel("Cancel")
-	cancelBtn.Connect("clicked", func() { gtk.MainQuit() })
+	cancelBtn.Connect("clicked", func() { window.Destroy() })
 	runBtn := gtk.NewButtonWithLabel("Run")
 	runBtn.Connect("clicked", func() {
 		modules.RunFileOperation(opEntry.Text(), sourceEntry.Text(), targetEntry.Text())
-		gtk.MainQuit()
+		window.Destroy()
 	})
 
 	buttons.PackStart(homeBtn, false, false, 0)
@@ -204,7 +204,6 @@ func showFileOpWindow(op, sourceValue, targetValue string) {
 	box.PackStart(browserScroll, true, true, 0)
 	box.PackStart(buttons, false, false, 0)
 	window.Add(box)
-	window.Connect("destroy", func() { gtk.MainQuit() })
 	refreshBrowser(currentDir)
 	window.ShowAll()
 	targetEntry.GrabFocus()

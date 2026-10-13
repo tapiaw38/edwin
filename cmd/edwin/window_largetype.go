@@ -62,15 +62,12 @@ func showLargeType(text string, monitor int) {
 	gtk.StyleContextAddProviderForScreen(screen, css, uint(gtk.STYLE_PROVIDER_PRIORITY_APPLICATION))
 
 	window.Connect("key-press-event", func(_ *gtk.Window, _ *gdk.Event) bool {
-		gtk.MainQuit()
+		window.Destroy()
 		return true
 	})
 	window.Connect("button-press-event", func() bool {
-		gtk.MainQuit()
+		window.Destroy()
 		return true
-	})
-	window.Connect("destroy", func() {
-		gtk.MainQuit()
 	})
 	window.ShowAll()
 }

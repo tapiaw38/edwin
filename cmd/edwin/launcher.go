@@ -32,6 +32,7 @@ const (
 
 //go:embed assets/edwin-tray.png
 var trayIcon []byte
+var mainWindow *gtk.Window
 
 func runLauncher() {
 	activationRequests := make(chan struct{}, 1)
@@ -63,6 +64,7 @@ func runLauncher() {
 	go preloadIcons()
 
 	window := newLauncherWindow()
+	mainWindow = window
 	mainBox := gtk.NewBox(gtk.OrientationVertical, 8)
 	mainBox.SetMarginStart(12)
 	mainBox.SetMarginEnd(12)
@@ -254,7 +256,7 @@ func connectKeyBindings(window *gtk.Window) {
 			selectPrev()
 			return true
 		case gdk.KEY_Return:
-			executeSelected()
+			executeSelected(window)
 			return true
 		case gdk.KEY_Tab:
 			showSelectedFileActions()
