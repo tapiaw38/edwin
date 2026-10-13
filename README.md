@@ -167,15 +167,25 @@ File ops: Tab on a file, then Rename/Copy/Move opens a visual picker with breadc
 
 Location: `~/.config/edwin/config.yaml`
 
+Color themes: `edwin` (default), `dark`, `midnight`, `light`, and `classic`.
+
+The `edwin` preset takes its colors from the butler-in-a-tuxedo app icon (`cmd/edwin/assets/edwin-icon.png`): `background_color: "24, 26, 34"`, `entry_background: "rgba(208, 193, 180, 0.2)"`, `focus_border_color: "245, 215, 140"`, `text_color: "#fdf2d6"`, `selection_color: "208, 193, 180"`, and `desc_color: "rgba(253, 242, 214, 0.62)"`.
+
+`theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
+
 ```yaml
 width: 600
 max_results: 6
-background_color: "30, 30, 40"
-background_alpha: 0.95
+theme: edwin
+background_color: "24, 26, 34"
+background_alpha: 0.97
 border_radius: 12
 font_size: 18
-text_color: white
-selection_color: "100, 150, 255"
+text_color: "#fdf2d6"
+selection_color: "208, 193, 180"
+entry_background: "rgba(208, 193, 180, 0.2)"
+focus_border_color: "245, 215, 140"
+desc_color: "rgba(253, 242, 214, 0.62)"
 show_icons: true
 icon_size: 24
 margin_top: 100

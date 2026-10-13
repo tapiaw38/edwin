@@ -9,17 +9,18 @@ import (
 )
 
 type Config struct {
-	Width           int     `yaml:"width"`
-	MaxResults      int     `yaml:"max_results"`
-	Theme           string  `yaml:"theme"`
-	BackgroundColor string  `yaml:"background_color"`
-	BackgroundAlpha float64 `yaml:"background_alpha"`
-	BorderRadius    int     `yaml:"border_radius"`
-	FontSize        int     `yaml:"font_size"`
-	TextColor       string  `yaml:"text_color"`
-	SelectionColor  string  `yaml:"selection_color"`
-	EntryBackground string  `yaml:"entry_background"`
-	DescColor       string  `yaml:"desc_color"`
+	Width            int     `yaml:"width"`
+	MaxResults       int     `yaml:"max_results"`
+	Theme            string  `yaml:"theme"`
+	BackgroundColor  string  `yaml:"background_color"`
+	BackgroundAlpha  float64 `yaml:"background_alpha"`
+	BorderRadius     int     `yaml:"border_radius"`
+	FontSize         int     `yaml:"font_size"`
+	TextColor        string  `yaml:"text_color"`
+	SelectionColor   string  `yaml:"selection_color"`
+	FocusBorderColor string  `yaml:"focus_border_color"`
+	EntryBackground  string  `yaml:"entry_background"`
+	DescColor        string  `yaml:"desc_color"`
 
 	WebShortcuts map[string]WebShortcut `yaml:"web_shortcuts"`
 
@@ -40,23 +41,24 @@ type WebShortcut struct {
 }
 
 var defaultConfig = Config{
-	Width:           600,
-	MaxResults:      6,
-	Theme:           "dark",
-	BackgroundColor: "30, 30, 40",
-	BackgroundAlpha: 0.95,
-	BorderRadius:    12,
-	FontSize:        18,
-	TextColor:       "white",
-	SelectionColor:  "100, 150, 255",
-	EntryBackground: "rgba(255, 255, 255, 0.1)",
-	DescColor:       "rgba(255, 255, 255, 0.6)",
-	ShowIcons:       true,
-	IconSize:        24,
-	MarginTop:       100,
-	HistoryBoost:    3,
-	SpellLanguage:   "en",
-	Hotkey:          "Alt,space",
+	Width:            600,
+	MaxResults:       6,
+	Theme:            "edwin",
+	BackgroundColor:  "24, 26, 34",
+	BackgroundAlpha:  0.97,
+	BorderRadius:     12,
+	FontSize:         18,
+	TextColor:        "#fdf2d6",
+	SelectionColor:   "208, 193, 180",
+	FocusBorderColor: "245, 215, 140",
+	EntryBackground:  "rgba(208, 193, 180, 0.2)",
+	DescColor:        "rgba(253, 242, 214, 0.62)",
+	ShowIcons:        true,
+	IconSize:         24,
+	MarginTop:        100,
+	HistoryBoost:     3,
+	SpellLanguage:    "en",
+	Hotkey:           "Alt,space",
 	WebShortcuts: map[string]WebShortcut{
 		"g":    {Name: "Google", URL: "https://www.google.com/search?q=%s", Icon: "web-browser"},
 		"yt":   {Name: "YouTube", URL: "https://www.youtube.com/results?search_query=%s", Icon: "youtube"},
@@ -90,6 +92,7 @@ func Load() error {
 		loaded.BackgroundAlpha = preset.BackgroundAlpha
 		loaded.TextColor = preset.TextColor
 		loaded.SelectionColor = preset.SelectionColor
+		loaded.FocusBorderColor = preset.FocusBorderColor
 		loaded.EntryBackground = preset.EntryBackground
 		loaded.DescColor = preset.DescColor
 	}
@@ -228,6 +231,7 @@ func GetCSS() string {
 		@define-color edwin-bg rgba(%s, %.2f);
 		@define-color edwin-text %s;
 		@define-color edwin-selection rgba(%s, 0.3);
+		@define-color edwin-focus-border rgba(%s, 1);
 		@define-color edwin-entry-bg %s;
 		@define-color edwin-desc-color %s;
 
@@ -239,9 +243,12 @@ func GetCSS() string {
 			font-size: %dpx;
 			padding: %dpx;
 			background: @edwin-entry-bg;
-			border: none;
+			border: 1px solid transparent;
 			border-radius: %dpx;
 			color: @edwin-text;
+		}
+		#edwin-entry:focus {
+			border: 1px solid @edwin-focus-border;
 		}
 		#edwin-results {
 			background: transparent;
@@ -277,7 +284,7 @@ func GetCSS() string {
 			font-size: %dpx;
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,
-		c.EntryBackground, c.DescColor,
+		c.FocusBorderColor, c.EntryBackground, c.DescColor,
 		c.BorderRadius, c.FontSize, SpacingLarge, RadiusMedium,
 		RadiusSmall, SpacingTiny, SpacingMedium, FontSizeTitle, FontSizeSmall)
 }
