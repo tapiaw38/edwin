@@ -19,6 +19,50 @@ const (
 	SpotifyControlSize = 36
 )
 
+type ColorPreset struct {
+	BackgroundColor string
+	BackgroundAlpha float64
+	TextColor       string
+	SelectionColor  string
+	EntryBackground string
+	DescColor       string
+}
+
+var ColorPresets = map[string]ColorPreset{
+	"dark": {
+		BackgroundColor: "30, 30, 40",
+		BackgroundAlpha: 0.95,
+		TextColor:       "white",
+		SelectionColor:  "100, 150, 255",
+		EntryBackground: "rgba(255, 255, 255, 0.1)",
+		DescColor:       "rgba(255, 255, 255, 0.6)",
+	},
+	"midnight": {
+		BackgroundColor: "8, 8, 12",
+		BackgroundAlpha: 0.97,
+		TextColor:       "white",
+		SelectionColor:  "40, 55, 95",
+		EntryBackground: "rgba(255, 255, 255, 0.07)",
+		DescColor:       "rgba(255, 255, 255, 0.5)",
+	},
+	"light": {
+		BackgroundColor: "245, 245, 248",
+		BackgroundAlpha: 0.97,
+		TextColor:       "#1c1c1e",
+		SelectionColor:  "90, 140, 255",
+		EntryBackground: "rgba(0, 0, 0, 0.06)",
+		DescColor:       "rgba(0, 0, 0, 0.55)",
+	},
+	"classic": {
+		BackgroundColor: "238, 232, 213",
+		BackgroundAlpha: 0.97,
+		TextColor:       "#073642",
+		SelectionColor:  "38, 139, 210",
+		EntryBackground: "rgba(0, 0, 0, 0.05)",
+		DescColor:       "rgba(7, 54, 66, 0.6)",
+	},
+}
+
 const StaticThemeCSS = `
 	@define-color spark-white rgba(255, 255, 255, 1);
 	@define-color spark-white-08 rgba(255, 255, 255, 0.08);

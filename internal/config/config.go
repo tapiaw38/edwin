@@ -11,12 +11,15 @@ import (
 type Config struct {
 	Width           int     `yaml:"width"`
 	MaxResults      int     `yaml:"max_results"`
+	Theme           string  `yaml:"theme"`
 	BackgroundColor string  `yaml:"background_color"`
 	BackgroundAlpha float64 `yaml:"background_alpha"`
 	BorderRadius    int     `yaml:"border_radius"`
 	FontSize        int     `yaml:"font_size"`
 	TextColor       string  `yaml:"text_color"`
 	SelectionColor  string  `yaml:"selection_color"`
+	EntryBackground string  `yaml:"entry_background"`
+	DescColor       string  `yaml:"desc_color"`
 
 	WebShortcuts map[string]WebShortcut `yaml:"web_shortcuts"`
 
@@ -38,12 +41,15 @@ type WebShortcut struct {
 var defaultConfig = Config{
 	Width:           600,
 	MaxResults:      6,
+	Theme:           "dark",
 	BackgroundColor: "30, 30, 40",
 	BackgroundAlpha: 0.95,
 	BorderRadius:    12,
 	FontSize:        18,
 	TextColor:       "white",
 	SelectionColor:  "100, 150, 255",
+	EntryBackground: "rgba(255, 255, 255, 0.1)",
+	DescColor:       "rgba(255, 255, 255, 0.6)",
 	ShowIcons:       true,
 	IconSize:        24,
 	MarginTop:       100,
@@ -71,7 +77,22 @@ func Load() error {
 		return Save()
 	}
 
+	var probe struct {
+		Theme string `yaml:"theme"`
+	}
+	yaml.Unmarshal(data, &probe)
+
 	loaded := defaultConfig
+	if preset, ok := ColorPresets[probe.Theme]; ok {
+		loaded.Theme = probe.Theme
+		loaded.BackgroundColor = preset.BackgroundColor
+		loaded.BackgroundAlpha = preset.BackgroundAlpha
+		loaded.TextColor = preset.TextColor
+		loaded.SelectionColor = preset.SelectionColor
+		loaded.EntryBackground = preset.EntryBackground
+		loaded.DescColor = preset.DescColor
+	}
+
 	if err := yaml.Unmarshal(data, &loaded); err != nil {
 		return err
 	}
@@ -207,6 +228,8 @@ func GetCSS() string {
 		@define-color spark-bg rgba(%s, %.2f);
 		@define-color spark-text %s;
 		@define-color spark-selection rgba(%s, 0.3);
+		@define-color spark-entry-bg %s;
+		@define-color spark-desc-color %s;
 
 		window {
 			background: @spark-bg;
@@ -215,7 +238,7 @@ func GetCSS() string {
 		#spark-entry {
 			font-size: %dpx;
 			padding: %dpx;
-			background: @spark-white-10;
+			background: @spark-entry-bg;
 			border: none;
 			border-radius: %dpx;
 			color: @spark-text;
@@ -250,10 +273,11 @@ func GetCSS() string {
 			font-size: %dpx;
 		}
 		#spark-desc {
-			color: @spark-white-60;
+			color: @spark-desc-color;
 			font-size: %dpx;
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,
+		c.EntryBackground, c.DescColor,
 		c.BorderRadius, c.FontSize, SpacingLarge, RadiusMedium,
 		RadiusSmall, SpacingTiny, SpacingMedium, FontSizeTitle, FontSizeSmall)
 }
