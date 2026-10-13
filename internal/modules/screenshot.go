@@ -1,7 +1,7 @@
 package modules
 
 import (
-	"github.com/tapiaw38/spark/internal/platform/commands"
+	"github.com/tapiaw38/edwin/internal/platform/commands"
 )
 
 func ScreenshotSearch(query string) []Result {

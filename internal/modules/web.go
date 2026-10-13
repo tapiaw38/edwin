@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 func WebSearch(query string) []Result {

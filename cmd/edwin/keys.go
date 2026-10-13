@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 func activeList() *gtk.ListBox {

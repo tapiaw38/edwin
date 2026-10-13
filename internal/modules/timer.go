@@ -23,6 +23,6 @@ func TimerSearch(query string) []Result {
 		Title:      "Timer: " + arg,
 		Desc:       "Notify when elapsed",
 		Icon:       "alarm-symbolic",
-		ActionSpec: StartAction("sh", "-c", "sleep "+secs+" && notify-send 'Spark Timer' '"+arg+" elapsed'").WithStatus("Timer set: " + arg),
+		ActionSpec: StartAction("sh", "-c", "sleep "+secs+" && notify-send 'Edwin Timer' '"+arg+" elapsed'").WithStatus("Timer set: " + arg),
 	}}
 }

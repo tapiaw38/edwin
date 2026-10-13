@@ -1,4 +1,6 @@
-# Spark
+![Edwin logo](cmd/edwin/assets/edwin-icon.png)
+
+# Edwin
 
 App launcher for Linux (Wayland/MangoWM).
 
@@ -7,12 +9,13 @@ App launcher for Linux (Wayland/MangoWM).
 - **Language:** Go
 - **UI:** GTK3 (gotk4 bindings)
 - **Wayland:** gtk-layer-shell
-- **Config:** YAML (~/.config/spark/config.yaml)
+- **System tray:** StatusNotifierItem over D-Bus
+- **Config:** YAML (~/.config/edwin/config.yaml)
 
 ## Build
 
 ```bash
-go build -buildvcs=false -o spark ./cmd/spark/
+go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
 ```
 
 ## Development
@@ -32,22 +35,26 @@ go test ./...
 ## Run
 
 ```bash
-./spark
+./edwin
 ```
+
+## System Tray
+
+Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-click the tray icon to show or hide the launcher; right-click and choose **Quit** to exit. Closing the launcher window or pressing `Esc` hides it while Edwin keeps running in the tray. Launching Edwin again activates the existing instance and brings its window forward.
 
 ## Setup Hotkey
 
 ```bash
-./spark --setup  # Updates ~/.config/mango/bind.conf with hotkey from config
+./edwin --setup  # Updates ~/.config/mango/bind.conf with hotkey from config
 ```
 
 ## Architecture
 
-Spark uses a lightweight hexagonal style:
+Edwin uses a lightweight hexagonal style:
 
 - `internal/modules` owns search logic and returns declarative `Result` values.
 - `Result.ActionSpec` describes what should happen when the user presses Enter.
-- `cmd/spark/action_executor.go` is the UI adapter that executes actions against the desktop/session.
+- `cmd/edwin/action_executor.go` is the UI adapter that executes actions against the desktop/session.
 - `internal/platform/commands` is the only package that wraps `os/exec`.
 
 Modules should prefer `ActionSpec` helpers such as `OpenAction`, `CopyAction`, `TerminalAction`, `EmailAction`, `FileAction`, `MusicAction`, `SyncAction`, and `SystemAction` instead of running shell commands directly.
@@ -55,12 +62,17 @@ Modules should prefer `ActionSpec` helpers such as `OpenAction`, `CopyAction`, `
 ## Project Structure
 
 ```bash
-spark/
-├── cmd/spark/
+edwin/
+├── cmd/edwin/
 │   ├── main.go             # Entry point and command dispatch
 │   ├── launcher.go         # GTK launcher window
+│   ├── single_instance.go  # D-Bus activation for the running instance
+│   ├── assets/
+│   │   ├── edwin-icon.png  # Project logo
+│   │   └── edwin-tray.png  # Monochrome tray icon
 │   ├── action_executor.go  # Executes modules.ActionSpec values
 │   └── window_*.go         # Focused GTK windows/dialogs
+├── third_party/gogpu-systray/ # Local SNI implementation with ItemIsMenu disabled
 ├── internal/
 │   ├── apps/apps.go        # .desktop file parsing, app search
 │   ├── config/config.go    # YAML config, CSS generation, hotkey setup
@@ -119,7 +131,7 @@ spark/
 | `contact`         | Contacts                      | `contact Ada`, `contact carddav`                               |
 | `email`           | Email composer + attachments  | `email contact \| Subject \| Body`                             |
 | `stats`           | Usage Stats                   | `stats`                                                        |
-| `sync`            | Sync Settings                 | `sync`, `sync import ~/spark-settings.zip`                     |
+| `sync`            | Sync Settings                 | `sync`, `sync import ~/edwin-settings.zip`                     |
 | `clip`            | Clipboard                     | `clip`                                                         |
 | `define`          | Dictionary                    | `define word`                                                  |
 | `spell`           | Spelling                      | `spell recieve`                                                |
@@ -153,7 +165,7 @@ File ops: Tab on a file, then Rename/Copy/Move opens a visual picker with breadc
 
 ## Config
 
-Location: `~/.config/spark/config.yaml`
+Location: `~/.config/edwin/config.yaml`
 
 ```yaml
 width: 600
@@ -202,7 +214,7 @@ type Result struct {
     KeepOpen        bool       // Keep launcher open after action
     Confirm         bool       // Ask before executing action
     NavigateQuery   string     // Replace query instead of executing
-    ActionSpec      ActionSpec // Declarative action executed by cmd/spark
+    ActionSpec      ActionSpec // Declarative action executed by cmd/edwin
     Action          func()     // Legacy escape hatch; avoid for new modules
 }
 ```
@@ -222,7 +234,7 @@ SystemAction(op)
 
 ### Spotify view
 
-Special UI in `cmd/spark/player.go`:
+Special UI in `cmd/edwin/player.go`:
 
 - `createSpotifyView()` - Build layout
 - `showSpotifyView()` / `hideSpotifyView()` - Toggle
@@ -249,7 +261,7 @@ go mod tidy
 Run directly to see GTK errors:
 
 ```bash
-./spark 2>&1
+./edwin 2>&1
 ```
 
 Test playerctl:

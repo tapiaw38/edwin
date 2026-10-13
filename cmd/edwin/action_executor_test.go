@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 func TestEveryActionKindHasHandler(t *testing.T) {
@@ -41,7 +41,7 @@ func TestUnknownActionFails(t *testing.T) {
 func TestCopyToClipboardFailsWhenNoWriterInstalled(t *testing.T) {
 	original := clipboardWriters
 	t.Cleanup(func() { clipboardWriters = original })
-	clipboardWriters = [][]string{{"spark-no-such-clipboard-tool"}}
+	clipboardWriters = [][]string{{"edwin-no-such-clipboard-tool"}}
 
 	if copyToClipboard("text") {
 		t.Error("copyToClipboard must report failure when no clipboard tool exists")
@@ -51,7 +51,7 @@ func TestCopyToClipboardFailsWhenNoWriterInstalled(t *testing.T) {
 func TestCopyActionDoesNotReportSuccessWhenCopyFails(t *testing.T) {
 	original := clipboardWriters
 	t.Cleanup(func() { clipboardWriters = original })
-	clipboardWriters = [][]string{{"spark-no-such-clipboard-tool"}}
+	clipboardWriters = [][]string{{"edwin-no-such-clipboard-tool"}}
 
 	action := modules.CopyAction("text").WithStatus("Copied!")
 	if executeActionSpec(action) {
@@ -62,7 +62,7 @@ func TestCopyActionDoesNotReportSuccessWhenCopyFails(t *testing.T) {
 func TestOpenTerminalFailsWhenNoTerminalInstalled(t *testing.T) {
 	original := terminals
 	t.Cleanup(func() { terminals = original })
-	terminals = []string{"spark-no-such-terminal"}
+	terminals = []string{"edwin-no-such-terminal"}
 
 	if openTerminal("true") {
 		t.Error("openTerminal must report failure when no terminal exists")
@@ -72,7 +72,7 @@ func TestOpenTerminalFailsWhenNoTerminalInstalled(t *testing.T) {
 func TestPasteDoesNotFireWhenCopyFails(t *testing.T) {
 	original := clipboardWriters
 	t.Cleanup(func() { clipboardWriters = original })
-	clipboardWriters = [][]string{{"spark-no-such-clipboard-tool"}}
+	clipboardWriters = [][]string{{"edwin-no-such-clipboard-tool"}}
 
 	if pasteText("snippet body") {
 		t.Error("pasteText must not paste stale clipboard content after a failed copy")

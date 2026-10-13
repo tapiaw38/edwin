@@ -6,17 +6,17 @@ import (
 	"strings"
 	"sync/atomic"
 
-	cmdrunner "github.com/tapiaw38/spark/internal/platform/commands"
+	cmdrunner "github.com/tapiaw38/edwin/internal/platform/commands"
 
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
-	"github.com/tapiaw38/spark/internal/config"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/config"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 func showFileOpWindow(op, sourceValue, targetValue string) {
 	window := gtk.NewWindow(gtk.WindowToplevel)
-	window.SetTitle("Spark File Operation")
+	window.SetTitle("Edwin File Operation")
 	window.SetDefaultSize(720, 520)
 
 	box := gtk.NewBox(gtk.OrientationVertical, 10)

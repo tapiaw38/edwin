@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 func main() {
@@ -65,8 +65,8 @@ func runSetup() {
 		os.Stderr.WriteString("Invalid config: " + err.Error() + "\n")
 		os.Exit(1)
 	}
-	sparkPath, _ := os.Executable()
-	if err := config.SetupHotkey(sparkPath); err != nil {
+	edwinPath, _ := os.Executable()
+	if err := config.SetupHotkey(edwinPath); err != nil {
 		os.Stderr.WriteString("Failed to setup hotkey: " + err.Error() + "\n")
 		os.Exit(1)
 	}

@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 const (

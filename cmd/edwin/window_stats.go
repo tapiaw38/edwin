@@ -5,12 +5,12 @@ import (
 
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
-	"github.com/tapiaw38/spark/internal/history"
+	"github.com/tapiaw38/edwin/internal/history"
 )
 
 func showStatsWindow() {
 	window := gtk.NewWindow(gtk.WindowToplevel)
-	window.SetTitle("Spark Usage Stats")
+	window.SetTitle("Edwin Usage Stats")
 	window.SetDefaultSize(520, 420)
 
 	box := gtk.NewBox(gtk.OrientationVertical, 10)

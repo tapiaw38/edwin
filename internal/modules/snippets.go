@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 var snippetsPath = config.ConfigFile("snippets.json")

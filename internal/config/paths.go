@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-const AppName = "spark"
+const AppName = "edwin"
 
 func homeDir() string {
 	if home, err := os.UserHomeDir(); err == nil && home != "" {

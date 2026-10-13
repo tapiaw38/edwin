@@ -8,7 +8,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 	"github.com/diamondburned/gotk4/pkg/pango"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 const (
@@ -135,7 +135,7 @@ func createSpotifyControlRow(r modules.Result) *gtk.ListBoxRow {
 	if r.Desc != "" {
 		desc := gtk.NewLabel(r.Desc)
 		desc.SetXAlign(1)
-		desc.SetName("spark-desc")
+		desc.SetName("edwin-desc")
 		hbox.PackEnd(desc, false, false, 0)
 	}
 

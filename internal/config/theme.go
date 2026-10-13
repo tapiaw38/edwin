@@ -64,17 +64,17 @@ var ColorPresets = map[string]ColorPreset{
 }
 
 const StaticThemeCSS = `
-	@define-color spark-white rgba(255, 255, 255, 1);
-	@define-color spark-white-08 rgba(255, 255, 255, 0.08);
-	@define-color spark-white-10 rgba(255, 255, 255, 0.1);
-	@define-color spark-white-14 rgba(255, 255, 255, 0.14);
-	@define-color spark-white-20 rgba(255, 255, 255, 0.2);
-	@define-color spark-white-50 rgba(255, 255, 255, 0.5);
-	@define-color spark-white-60 rgba(255, 255, 255, 0.6);
-	@define-color spark-white-70 rgba(255, 255, 255, 0.7);
-	@define-color spark-white-80 rgba(255, 255, 255, 0.8);
-	@define-color spark-black-20 rgba(0, 0, 0, 0.2);
-	@define-color spark-black-30 rgba(0, 0, 0, 0.3);
-	@define-color spark-black-92 rgba(0, 0, 0, 0.92);
-	@define-color spark-spotify-green #1DB954;
+	@define-color edwin-white rgba(255, 255, 255, 1);
+	@define-color edwin-white-08 rgba(255, 255, 255, 0.08);
+	@define-color edwin-white-10 rgba(255, 255, 255, 0.1);
+	@define-color edwin-white-14 rgba(255, 255, 255, 0.14);
+	@define-color edwin-white-20 rgba(255, 255, 255, 0.2);
+	@define-color edwin-white-50 rgba(255, 255, 255, 0.5);
+	@define-color edwin-white-60 rgba(255, 255, 255, 0.6);
+	@define-color edwin-white-70 rgba(255, 255, 255, 0.7);
+	@define-color edwin-white-80 rgba(255, 255, 255, 0.8);
+	@define-color edwin-black-20 rgba(0, 0, 0, 0.2);
+	@define-color edwin-black-30 rgba(0, 0, 0, 0.3);
+	@define-color edwin-black-92 rgba(0, 0, 0, 0.92);
+	@define-color edwin-spotify-green #1DB954;
 `

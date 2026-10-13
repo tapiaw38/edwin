@@ -4,9 +4,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/tapiaw38/spark/internal/platform/commands"
+	"github.com/tapiaw38/edwin/internal/platform/commands"
 
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 func SpellSearch(query string) []Result {

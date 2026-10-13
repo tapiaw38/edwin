@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 var (

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 func SSHSearch(query string) []Result {

@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	cmdrunner "github.com/tapiaw38/spark/internal/platform/commands"
+	cmdrunner "github.com/tapiaw38/edwin/internal/platform/commands"
 
-	"github.com/tapiaw38/spark/internal/apps"
-	"github.com/tapiaw38/spark/internal/config"
-	"github.com/tapiaw38/spark/internal/history"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/apps"
+	"github.com/tapiaw38/edwin/internal/config"
+	"github.com/tapiaw38/edwin/internal/history"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 var terminalExecArgs = map[string][]string{
@@ -455,7 +455,7 @@ func executeSyncAction(action modules.ActionSpec) bool {
 			modules.SetStatus(false, "Sync import failed: "+err.Error())
 			return false
 		}
-		modules.SetStatus(true, "Imported Spark settings from "+action.Args[0])
+		modules.SetStatus(true, "Imported Edwin settings from "+action.Args[0])
 		return true
 	case "export":
 		if len(action.Args) < 3 {
@@ -465,7 +465,7 @@ func executeSyncAction(action modules.ActionSpec) bool {
 			modules.SetStatus(false, "Sync export failed: "+err.Error())
 			return false
 		}
-		modules.SetStatus(true, "Exported Spark settings to "+action.Args[0])
+		modules.SetStatus(true, "Exported Edwin settings to "+action.Args[0])
 		return true
 	case "script":
 		if len(action.Args) < 3 {

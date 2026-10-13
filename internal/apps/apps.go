@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tapiaw38/spark/internal/config"
-	"github.com/tapiaw38/spark/internal/history"
-	"github.com/tapiaw38/spark/internal/platform/commands"
+	"github.com/tapiaw38/edwin/internal/config"
+	"github.com/tapiaw38/edwin/internal/history"
+	"github.com/tapiaw38/edwin/internal/platform/commands"
 )
 
 type App struct {
 	Name     string
-	Exec     string // Display/backward-compatible representation.
+	Exec     string
 	ExecArgs []string
 	Icon     string
 }
@@ -114,8 +114,6 @@ func cleanDesktopExec(execCmd string) string {
 	return strings.Join(parseDesktopExec(execCmd), " ")
 }
 
-// parseDesktopExec handles quoting and removes field codes because Spark
-// launches applications without file/URI arguments.
 func parseDesktopExec(command string) []string {
 	var args []string
 	var current strings.Builder

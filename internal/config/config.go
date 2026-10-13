@@ -116,7 +116,6 @@ func Save() error {
 	return AtomicWrite(configPath, data, 0644)
 }
 
-// AtomicWrite prevents readers from observing partially-written state files.
 func AtomicWrite(path string, data []byte, mode os.FileMode) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
@@ -152,9 +151,9 @@ func AtomicWrite(path string, data []byte, mode os.FileMode) error {
 	return nil
 }
 
-func SetupHotkey(sparkPath string) error {
+func SetupHotkey(edwinPath string) error {
 	bindPath := HomeFile(".config", "mango", "bind.conf")
-	bindLine := fmt.Sprintf("bind=%s,spawn,%s", Current.Hotkey, sparkPath)
+	bindLine := fmt.Sprintf("bind=%s,spawn,%s", Current.Hotkey, edwinPath)
 
 	data, err := os.ReadFile(bindPath)
 	if err != nil {
@@ -167,7 +166,7 @@ func SetupHotkey(sparkPath string) error {
 	found := false
 
 	for _, line := range splitLines(content) {
-		if containsSparkBind(line) {
+		if containsEdwinBind(line) {
 			if !found {
 				newLines = append(newLines, bindLine)
 				found = true
@@ -213,9 +212,9 @@ func joinLines(lines []string) string {
 	return result
 }
 
-func containsSparkBind(line string) bool {
+func containsEdwinBind(line string) bool {
 	for i := 0; i < len(line); i++ {
-		if i+5 <= len(line) && line[i:i+5] == "spark" {
+		if i+5 <= len(line) && line[i:i+5] == "edwin" {
 			return true
 		}
 	}
@@ -225,55 +224,55 @@ func containsSparkBind(line string) bool {
 func GetCSS() string {
 	c := Current
 	return StaticThemeCSS + fmt.Sprintf(`
-		@define-color spark-bg rgba(%s, %.2f);
-		@define-color spark-text %s;
-		@define-color spark-selection rgba(%s, 0.3);
-		@define-color spark-entry-bg %s;
-		@define-color spark-desc-color %s;
+		@define-color edwin-bg rgba(%s, %.2f);
+		@define-color edwin-text %s;
+		@define-color edwin-selection rgba(%s, 0.3);
+		@define-color edwin-entry-bg %s;
+		@define-color edwin-desc-color %s;
 
 		window {
-			background: @spark-bg;
+			background: @edwin-bg;
 			border-radius: %dpx;
 		}
-		#spark-entry {
+		#edwin-entry {
 			font-size: %dpx;
 			padding: %dpx;
-			background: @spark-entry-bg;
+			background: @edwin-entry-bg;
 			border: none;
 			border-radius: %dpx;
-			color: @spark-text;
+			color: @edwin-text;
 		}
-		#spark-results {
+		#edwin-results {
 			background: transparent;
 		}
-		#spark-row {
+		#edwin-row {
 			background: transparent;
-			color: @spark-text;
+			color: @edwin-text;
 			border-radius: %dpx;
 			padding: %dpx %dpx;
 			outline: none;
 			box-shadow: none;
 		}
-		#spark-row:hover,
-		#spark-row:focus,
-		#spark-row:active {
+		#edwin-row:hover,
+		#edwin-row:focus,
+		#edwin-row:active {
 			background: transparent;
 			outline: none;
 			box-shadow: none;
 		}
-		#spark-row:selected,
-		#spark-row:selected:hover,
-		#spark-row:selected:focus {
-			background: @spark-selection;
+		#edwin-row:selected,
+		#edwin-row:selected:hover,
+		#edwin-row:selected:focus {
+			background: @edwin-selection;
 			outline: none;
 			box-shadow: none;
 		}
-		#spark-title {
-			color: @spark-text;
+		#edwin-title {
+			color: @edwin-text;
 			font-size: %dpx;
 		}
-		#spark-desc {
-			color: @spark-desc-color;
+		#edwin-desc {
+			color: @edwin-desc-color;
 			font-size: %dpx;
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,

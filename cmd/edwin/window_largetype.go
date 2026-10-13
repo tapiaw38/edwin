@@ -4,7 +4,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 	"github.com/diamondburned/gotk4/pkg/pango"
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 func showLargeTypeAll(text string) {
@@ -20,7 +20,7 @@ func showLargeTypeAll(text string) {
 
 func showLargeType(text string, monitor int) {
 	window := gtk.NewWindow(gtk.WindowToplevel)
-	window.SetTitle("Spark Large Type")
+	window.SetTitle("Edwin Large Type")
 	window.SetDecorated(false)
 	if monitor >= 0 {
 		window.FullscreenOnMonitor(gdk.ScreenGetDefault(), monitor)
@@ -50,10 +50,10 @@ func showLargeType(text string, monitor int) {
 	css := gtk.NewCSSProvider()
 	css.LoadFromData(config.StaticThemeCSS + `
 		#large-type-window {
-			background: @spark-black-92;
+			background: @edwin-black-92;
 		}
 		#large-type-label {
-			color: @spark-white;
+			color: @edwin-white;
 			font-size: ` + largeTypeFontSize(text) + `px;
 			font-weight: bold;
 		}

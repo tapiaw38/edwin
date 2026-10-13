@@ -17,12 +17,12 @@ func TestXDGEnvVarsWin(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"ConfigDir", ConfigDir(), "/custom/cfg/spark"},
-		{"DataDir", DataDir(), "/custom/data/spark"},
-		{"CacheDir", CacheDir(), "/custom/cache/spark"},
-		{"ConfigFile", ConfigFile("config.yaml"), "/custom/cfg/spark/config.yaml"},
-		{"DataFile", DataFile("history.json"), "/custom/data/spark/history.json"},
-		{"CacheSubdir", CacheSubdir("art"), "/custom/cache/spark/art"},
+		{"ConfigDir", ConfigDir(), "/custom/cfg/edwin"},
+		{"DataDir", DataDir(), "/custom/data/edwin"},
+		{"CacheDir", CacheDir(), "/custom/cache/edwin"},
+		{"ConfigFile", ConfigFile("config.yaml"), "/custom/cfg/edwin/config.yaml"},
+		{"DataFile", DataFile("history.json"), "/custom/data/edwin/history.json"},
+		{"CacheSubdir", CacheSubdir("art"), "/custom/cache/edwin/art"},
 		{"DataHomeFile", DataHomeFile("applications"), "/custom/data/applications"},
 	}
 	for _, tt := range tests {
@@ -43,9 +43,9 @@ func TestFallsBackToHomeWhenXDGUnset(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"ConfigDir", ConfigDir(), "/home/tester/.config/spark"},
-		{"DataDir", DataDir(), "/home/tester/.local/share/spark"},
-		{"CacheDir", CacheDir(), "/home/tester/.cache/spark"},
+		{"ConfigDir", ConfigDir(), "/home/tester/.config/edwin"},
+		{"DataDir", DataDir(), "/home/tester/.local/share/edwin"},
+		{"CacheDir", CacheDir(), "/home/tester/.cache/edwin"},
 		{"DataHomeFile", DataHomeFile("Trash", "files"), "/home/tester/.local/share/Trash/files"},
 		{"HomeFile", HomeFile(".ssh", "config"), "/home/tester/.ssh/config"},
 	}
@@ -56,7 +56,7 @@ func TestFallsBackToHomeWhenXDGUnset(t *testing.T) {
 	}
 }
 
-func TestSparkDirsAreAllUnderTheAppName(t *testing.T) {
+func TestEdwinDirsAreAllUnderTheAppName(t *testing.T) {
 	t.Setenv("HOME", "/home/tester")
 	t.Setenv("XDG_CONFIG_HOME", "")
 	t.Setenv("XDG_DATA_HOME", "")

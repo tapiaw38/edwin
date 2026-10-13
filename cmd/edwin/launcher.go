@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"os"
 	"time"
 
@@ -9,8 +10,9 @@ import (
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 	"github.com/diamondburned/gotk4/pkg/pango"
-	"github.com/tapiaw38/spark/internal/apps"
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/gogpu/systray"
+	"github.com/tapiaw38/edwin/internal/apps"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 const (
@@ -28,10 +30,32 @@ const (
 	preloadApps   = 20
 )
 
+//go:embed assets/edwin-tray.png
+var trayIcon []byte
+
 func runLauncher() {
+	activationRequests := make(chan struct{}, 1)
+	cleanupInstance, alreadyRunning, err := claimSingleInstance(func() {
+		select {
+		case activationRequests <- struct{}{}:
+		default:
+		}
+	})
+	if alreadyRunning {
+		if err != nil {
+			os.Stderr.WriteString("Failed to activate running Edwin instance: " + err.Error() + "\n")
+		}
+		return
+	}
+	if err != nil {
+		os.Stderr.WriteString("Failed to register Edwin instance: " + err.Error() + "\n")
+		return
+	}
+	defer cleanupInstance()
+
 	gtk.Init()
 	if err := config.Load(); err != nil {
-		os.Stderr.WriteString("Spark config invalid: " + err.Error() + "\n")
+		os.Stderr.WriteString("Edwin config invalid: " + err.Error() + "\n")
 	}
 
 	allApps = apps.Load()
@@ -51,7 +75,9 @@ func runLauncher() {
 	buildPreviewPane()
 	connectKeyBindings(window)
 
-	window.Connect("destroy", func() { gtk.MainQuit() })
+	window.ConnectDeleteEvent(func(_ *gdk.Event) bool {
+		return window.HideOnDelete()
+	})
 
 	mainBox.PackStart(entry, false, false, 0)
 	mainBox.PackStart(resultsScroll, false, false, 0)
@@ -65,14 +91,39 @@ func runLauncher() {
 	spotifyView.Hide()
 	resultsScroll.Hide()
 	entry.GrabFocus()
+	tray := systray.New()
+	menu := systray.NewMenu()
+	menu.Add("Quit", func() {
+		glib.IdleAdd(func() { gtk.MainQuit() })
+	})
+	tray.SetIcon(trayIcon).SetTooltip("Edwin").OnClick(func() {
+		glib.IdleAdd(func() {
+			if window.IsVisible() {
+				window.Hide()
+			} else {
+				window.Show()
+				window.Present()
+				entry.GrabFocus()
+			}
+		})
+	}).SetMenu(menu).Show()
+	go func() {
+		for range activationRequests {
+			glib.IdleAdd(func() {
+				window.Show()
+				window.Present()
+				entry.GrabFocus()
+			})
+		}
+	}()
 
 	gtk.Main()
-	os.Exit(0)
+	tray.Remove()
 }
 
 func newLauncherWindow() *gtk.Window {
 	window := gtk.NewWindow(gtk.WindowToplevel)
-	window.SetTitle("Spark")
+	window.SetTitle("Edwin")
 	window.SetDefaultSize(config.Current.Width, -1)
 	window.SetSizeRequest(config.Current.Width, -1)
 	window.SetDecorated(false)
@@ -89,7 +140,7 @@ func buildSearchEntry() *gtk.Entry {
 	entry := gtk.NewEntry()
 	searchEntry = entry
 	entry.SetPlaceholderText("Search apps, ;snippet, define word, > shell...")
-	entry.SetName("spark-entry")
+	entry.SetName("edwin-entry")
 
 	entry.Connect("changed", func() {
 		query := entry.Text()
@@ -113,7 +164,7 @@ func buildSearchEntry() *gtk.Entry {
 
 func buildResultsList() {
 	listBox = gtk.NewListBox()
-	listBox.SetName("spark-results")
+	listBox.SetName("edwin-results")
 	listBox.SetSelectionMode(gtk.SelectionSingle)
 
 	resultsScroll = gtk.NewScrolledWindow(nil, nil)
@@ -134,19 +185,19 @@ func buildResultsList() {
 
 func buildPreviewPane() {
 	previewBox = gtk.NewBox(gtk.OrientationVertical, 8)
-	previewBox.SetName("spark-preview")
+	previewBox.SetName("edwin-preview")
 	previewBox.SetSizeRequest(-1, previewHeight)
 	previewBox.SetNoShowAll(true)
 
 	previewBox.PackStart(buildPreviewToolbar(), false, false, 0)
 
 	previewImage = gtk.NewImage()
-	previewImage.SetName("spark-preview-image")
+	previewImage.SetName("edwin-preview-image")
 	previewImage.SetSizeRequest(220, 180)
 	previewImage.SetNoShowAll(true)
 
 	previewLabel = gtk.NewLabel("")
-	previewLabel.SetName("spark-preview-label")
+	previewLabel.SetName("edwin-preview-label")
 	previewLabel.SetXAlign(0)
 	previewLabel.SetLineWrap(true)
 	previewLabel.SetLineWrapMode(pango.WrapWordChar)
@@ -160,7 +211,7 @@ func buildPreviewPane() {
 
 func buildPreviewToolbar() *gtk.Box {
 	previewToolbar = gtk.NewBox(gtk.OrientationHorizontal, 6)
-	previewToolbar.SetName("spark-preview-toolbar")
+	previewToolbar.SetName("edwin-preview-toolbar")
 	previewToolbar.SetNoShowAll(true)
 
 	buttons := []struct {
@@ -180,7 +231,7 @@ func buildPreviewToolbar() *gtk.Box {
 
 	previewMeta = gtk.NewLabel("")
 	previewMeta.SetXAlign(0)
-	previewMeta.SetName("spark-desc")
+	previewMeta.SetName("edwin-desc")
 	previewToolbar.PackStart(previewMeta, true, true, 0)
 	return previewToolbar
 }
@@ -194,7 +245,7 @@ func connectKeyBindings(window *gtk.Window) {
 				updateResults(searchEntry.Text())
 				return true
 			}
-			gtk.MainQuit()
+			window.Hide()
 			return true
 		case gdk.KEY_Down:
 			selectNext()

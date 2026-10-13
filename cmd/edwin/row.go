@@ -9,15 +9,15 @@ import (
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 	"github.com/diamondburned/gotk4/pkg/pango"
-	"github.com/tapiaw38/spark/internal/config"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/config"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 const dragIconSize = 96
 
 func createResultRow(r modules.Result) *gtk.ListBoxRow {
 	row := gtk.NewListBoxRow()
-	row.SetName("spark-row")
+	row.SetName("edwin-row")
 
 	hbox := gtk.NewBox(gtk.OrientationHorizontal, 8)
 	hbox.SetMarginStart(8)
@@ -33,7 +33,7 @@ func createResultRow(r modules.Result) *gtk.ListBoxRow {
 
 	title := gtk.NewLabel(r.Title)
 	title.SetXAlign(0)
-	title.SetName("spark-title")
+	title.SetName("edwin-title")
 	title.SetEllipsize(pango.EllipsizeEnd)
 	title.SetMaxWidthChars(50)
 	vbox.PackStart(title, false, false, 0)
@@ -41,7 +41,7 @@ func createResultRow(r modules.Result) *gtk.ListBoxRow {
 	if r.Desc != "" {
 		desc := gtk.NewLabel(r.Desc)
 		desc.SetXAlign(0)
-		desc.SetName("spark-desc")
+		desc.SetName("edwin-desc")
 		desc.SetEllipsize(pango.EllipsizeEnd)
 		desc.SetMaxWidthChars(60)
 		vbox.PackStart(desc, false, false, 0)
@@ -60,7 +60,7 @@ func createResultRow(r modules.Result) *gtk.ListBoxRow {
 func resultIcon(r modules.Result) gtk.Widgetter {
 	if r.IconText != "" {
 		icon := gtk.NewLabel(r.IconText)
-		icon.SetName("spark-icon-text")
+		icon.SetName("edwin-icon-text")
 		icon.SetSizeRequest(config.Current.IconSize+8, config.Current.IconSize+8)
 		icon.SetXAlign(0.5)
 		icon.SetYAlign(0.5)

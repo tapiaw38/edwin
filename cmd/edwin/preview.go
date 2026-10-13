@@ -9,7 +9,7 @@ import (
 	"github.com/diamondburned/gotk4/pkg/gdkpixbuf/v2"
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
-	"github.com/tapiaw38/spark/internal/modules"
+	"github.com/tapiaw38/edwin/internal/modules"
 )
 
 const (

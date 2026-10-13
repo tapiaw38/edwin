@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tapiaw38/spark/internal/config"
+	"github.com/tapiaw38/edwin/internal/config"
 )
 
 func SyncSearch(query string) []Result {
@@ -21,13 +21,13 @@ func SyncSearch(query string) []Result {
 	configDir := config.ConfigDir()
 	dataDir := config.DataDir()
 	paths := configDir + "\n" + dataDir
-	exportPath := config.HomeFile("spark-settings.zip")
+	exportPath := config.HomeFile("edwin-settings.zip")
 
 	if strings.HasPrefix(q, "sync import ") {
 		zipPath := strings.TrimSpace(query[len("sync import "):])
 		return []Result{{
 			Type:       TypeSync,
-			Title:      "Import Spark Settings",
+			Title:      "Import Edwin Settings",
 			Desc:       zipPath,
 			Icon:       "document-open",
 			Confirm:    true,
@@ -46,7 +46,7 @@ func SyncSearch(query string) []Result {
 		{
 			Type:       TypeSync,
 			Title:      "Copy Sync Paths",
-			Desc:       "~/.config/spark + ~/.local/share/spark",
+			Desc:       "~/.config/edwin + ~/.local/share/edwin",
 			Icon:       "edit-copy",
 			ActionSpec: CopyAction(paths),
 		},
@@ -62,21 +62,21 @@ func SyncSearch(query string) []Result {
 			Title:      "Sync with Git/Syncthing",
 			Desc:       "Track copied paths with external sync",
 			Icon:       "emblem-synchronizing",
-			ActionSpec: CopyAction("Sync these Spark paths:\n" + paths),
+			ActionSpec: CopyAction("Sync these Edwin paths:\n" + paths),
 		},
 		{
 			Type:       TypeSync,
 			Title:      "Copy Git Bootstrap",
-			Desc:       "~/.config/spark",
+			Desc:       "~/.config/edwin",
 			Icon:       "git",
-			ActionSpec: CopyAction("cd ~/.config/spark\ngit init\ngit add .\ngit commit -m 'sync spark settings'\n"),
+			ActionSpec: CopyAction("cd ~/.config/edwin\ngit init\ngit add .\ngit commit -m 'sync edwin settings'\n"),
 		},
 		{
 			Type:       TypeSync,
 			Title:      "Create Git Bootstrap Script",
-			Desc:       filepath.Join(configDir, "spark-sync-git.sh"),
+			Desc:       filepath.Join(configDir, "edwin-sync-git.sh"),
 			Icon:       "document-save",
-			ActionSpec: SyncAction("script", filepath.Join(configDir, "spark-sync-git.sh"), configDir, dataDir),
+			ActionSpec: SyncAction("script", filepath.Join(configDir, "edwin-sync-git.sh"), configDir, dataDir),
 		},
 		{
 			Type:       TypeSync,
@@ -96,7 +96,7 @@ func SyncSearch(query string) []Result {
 }
 
 func WriteSyncScript(path, configDir, dataDir string) error {
-	content := "#!/bin/sh\nset -eu\nfor dir in '" + configDir + "' '" + dataDir + "'; do\n  mkdir -p \"$dir\"\n  cd \"$dir\"\n  if [ ! -d .git ]; then git init; fi\n  git add .\n  git commit -m 'sync spark settings' || true\ndone\n"
+	content := "#!/bin/sh\nset -eu\nfor dir in '" + configDir + "' '" + dataDir + "'; do\n  mkdir -p \"$dir\"\n  cd \"$dir\"\n  if [ ! -d .git ]; then git init; fi\n  git add .\n  git commit -m 'sync edwin settings' || true\ndone\n"
 	if err := config.AtomicWrite(path, []byte(content), 0755); err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func WriteSyncScript(path, configDir, dataDir string) error {
 
 func WriteSyncProfile(path, configDir, dataDir string) error {
 	paths := configDir + "\n" + dataDir
-	content := "Spark sync paths:\n" + paths + "\n\nSyncthing:\n- Add both folders as send/receive folders.\n- Keep ignore patterns for cache files.\n\nGit:\ncd " + configDir + "\ngit init\ngit add .\ngit commit -m 'sync spark config'\n\nData:\ncd " + dataDir + "\ngit init\ngit add .\ngit commit -m 'sync spark data'\n"
+	content := "Edwin sync paths:\n" + paths + "\n\nSyncthing:\n- Add both folders as send/receive folders.\n- Keep ignore patterns for cache files.\n\nGit:\ncd " + configDir + "\ngit init\ngit add .\ngit commit -m 'sync edwin config'\n\nData:\ncd " + dataDir + "\ngit init\ngit add .\ngit commit -m 'sync edwin data'\n"
 	return config.AtomicWrite(path, []byte(content), 0644)
 }
 

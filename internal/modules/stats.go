@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tapiaw38/spark/internal/history"
+	"github.com/tapiaw38/edwin/internal/history"
 )
 
 func StatsSearch(query string) []Result {
