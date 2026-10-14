@@ -20,7 +20,7 @@ Install the precompiled binary from the latest GitHub Release:
 curl -fsSL https://raw.githubusercontent.com/tapiaw38/edwin/main/install.sh | sh
 ```
 
-The installer downloads the release asset and places it at `~/.local/bin/edwin`; it does not clone the repository or compile source. On Arch, it installs the runtime packages with `sudo pacman`. On other distributions, install equivalent system libraries manually. Add `~/.local/bin` to `PATH` to run `edwin` by name.
+The installer downloads the `edwin` asset from the latest GitHub Release and places it at `~/.local/bin/edwin`; it does not clone the repository or compile source. On Arch, it installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell` with `sudo pacman`. On other distributions, install equivalent system libraries manually. Edwin also needs an active session D-Bus; `xdg-utils` provides the default `xdg-open` folder opener. Add `~/.local/bin` to `PATH` to run `edwin` by name.
 
 To run the same installer from a local checkout:
 
@@ -32,7 +32,7 @@ cd edwin
 
 ## Build from source
 
-For development, build manually:
+For development only. This manual build is separate from `install.sh`:
 
 ```bash
 go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
@@ -56,8 +56,10 @@ go vet ./...
 ## Run
 
 ```bash
-./edwin
+edwin
 ```
+
+For a manual source build, run `./edwin` from the repository root.
 
 ## System Tray
 
@@ -66,8 +68,10 @@ Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-cl
 ## Setup Hotkey
 
 ```bash
-./edwin --setup  # Updates ~/.config/mango/bind.conf with hotkey from config
+edwin --setup
 ```
+
+Writes the configured hotkey and Edwin executable path to `~/.config/mango/bind.conf`; restart MangoWM to apply it. For a manual source build, use `./edwin --setup`.
 
 ## Architecture
 
@@ -84,19 +88,20 @@ Modules should prefer `ActionSpec` helpers such as `OpenAction`, `CopyAction`, `
 
 ```bash
 edwin/
-├── LICENSE, README.md, go.mod, go.sum
-├── .github/workflows/ci.yml
+├── LICENSE, README.md, install.sh, go.mod, go.sum
+├── .github/workflows/ci.yml, release.yml
 ├── cmd/edwin/
-│   ├── main.go, launcher.go, single_instance.go
-│   ├── action_executor.go, css.go, keys.go, player.go
+│   ├── main.go, main_test.go, launcher.go, single_instance.go
+│   ├── action_executor.go, action_executor_test.go
+│   ├── css.go, keys.go, player.go
 │   ├── preview.go, results.go, row.go, search.go, state.go
 │   ├── window_email.go, window_fileop.go
 │   ├── window_largetype.go, window_stats.go
 │   └── assets/ (edwin-icon.png, edwin-tray.png)
 ├── third_party/gogpu-systray/ # Local SNI implementation with ItemIsMenu disabled
 ├── internal/
-│   ├── apps/apps.go
-│   ├── config/ (config.go, paths.go, theme.go)
+│   ├── apps/ (apps.go, apps_test.go)
+│   ├── config/ (config.go, paths.go, theme.go, *_test.go)
 │   ├── history/history.go
 │   ├── platform/commands/commands.go
 │   └── modules/
@@ -105,29 +110,31 @@ edwin/
 │       ├── dictionary.go, email.go, emoji.go, files.go
 │       ├── file_actions.go, file_ops.go, navigation.go
 │       ├── clipboard.go, snippets.go, spell.go, recent.go, help.go
-│       ├── large_type.go, stats.go, status.go, sync.go, system.go, text.go
+│       ├── large_type.go, preview.go, shell.go, stats.go, status.go
+│       ├── sync.go, system.go, text.go
 │       ├── kill.go, pass.go, ssh.go, screenshot.go, timer.go, units.go
 │       ├── weather.go, web.go, window.go
-│       └── music.go, spotify.go, youtube.go, chrome_session.go, firefox_session.go
+│       ├── music.go, spotify.go, youtube.go, chrome_session.go, firefox_session.go
+│       └── *_test.go
 ```
 
 ## Features & Prefixes
 
-| Prefix            | Feature                       | Example                                                        |
+| Input or shortcut | Feature                       | Example                                                        |
 | ----------------- | ----------------------------- | -------------------------------------------------------------- |
-| (none)            | App search, calculator        | `firefox`, `2+2`                                                |
+| (none)            | App search, calculator, Google fallback | `firefox`, `2+2`, `search terms`                    |
 | `>`               | Shell command                 | `> htop`                                                       |
 | `;`/`snip`        | Snippet                       | `;email`, `snip email`                                          |
 | `f`/`file`        | File search                   | `f readme`                                                     |
 | `Tab`             | File actions                  | select file, press `Tab`                                       |
-| file op window    | Visual file ops               | Tab -> Rename/Copy/Move                                        |
+| File operation window | Visual file operations    | `Tab` → Rename/Copy/Move                                      |
 | `nav`/`browse`    | Folder navigation             | `nav ~/Downloads`                                              |
 | `pick`            | Destination picker            | `pick copy source \| ~/Downloads`                              |
 | `rename`          | Rename file                   | `rename source \| new-name`                                    |
 | `copy`            | Copy file                     | `copy source \| target`                                        |
 | `move`            | Move file                     | `move source \| target`                                        |
 | `undo`            | Undo last file operation      | `undo`                                                         |
-| `status`          | Last action/error             | `status`                                                       |
+| `status`/`last`   | Last action/error             | `status`                                                       |
 | `buffer`/`buf`    | File buffer                   | `buffer`                                                       |
 | `recent`          | Recent documents              | `recent invoice`, `recent app firefox`                         |
 | `large`/`type`/`lt` | Large Type                  | `large 555-1234`                                               |
@@ -140,12 +147,13 @@ edwin/
 | `clip`/`clipboard`/`cb`/`paste` | Clipboard       | `clip`, `cb query`, `paste query`                              |
 | `define`/`def`    | Dictionary                    | `define word`                                                  |
 | `spell`/`spelling` | Spelling                     | `spell recieve`                                                |
-| `sp`/`spotify`    | Spotify controls/status       | `sp`, `sp status`                                              |
-| `yp`/`youtube player` | YouTube player controls    | `yp play`, `yp status`                                         |
+| `sp`/`spotify`    | Spotify player view and controls | `sp`                                                        |
+| `yp`/`youtube player` | YouTube player view and controls | `yp`, `yp play`, `yp status`                              |
 | `m`/`music`       | Local music                   | `m song`, `m artists`, `m artist name`, `m albums`, `m genres` |
 | `mq`/`music queue`/`queue music` | Music queue      | `mq`, `music queue`                                            |
-| web shortcuts     | Web and YouTube search        | `g`, `yt`, `gh`, `wiki`, `ddg`, `r`, `so` (default keys)       |
-| system commands   | Session/power actions         | `lock`, `sleep`, `hibernate`, `reboot`, `shutdown`, `logout`, `trash` |
+| `yt`/`youtube`    | YouTube video search          | `yt video`                                                     |
+| web shortcut keys | Configured web search         | `g`, `gh`, `wiki`, `ddg`, `r`, `so`                            |
+| system search     | Session/power actions         | `lock`, `sleep`, `hibernate`, `reboot`, `shutdown`, `logout`, `trash` |
 | `emoji`           | Emoji picker                  | `emoji fire`                                                   |
 | `b64`/`b64d`      | Base64 encode/decode          | `b64 hello`                                                    |
 | `url`/`urld`      | URL encode/decode             | `url a b&c`                                                    |
@@ -229,7 +237,6 @@ type Result struct {
     Title           string     // Main text
     Desc            string     // Secondary text
     Icon            string     // Icon name or path
-    IconText        string     // Text fallback for icon display
     Preview         string     // Preview pane text
     PreviewImage    string     // Preview pane image path
     PreviewImageURL string     // Remote image to cache for preview
@@ -238,7 +245,6 @@ type Result struct {
     Confirm         bool       // Ask before executing action
     NavigateQuery   string     // Replace query instead of executing
     ActionSpec      ActionSpec // Declarative action executed by cmd/edwin
-    Action          func()     // Legacy escape hatch; avoid for new modules
 }
 ```
 
@@ -246,13 +252,24 @@ Common action helpers:
 
 ```go
 OpenAction(pathOrURL)
+OpenPathsAction(paths...)
 CopyAction(text)
+StartAction(name, args...)
+RunAction(name, args...)
 TerminalAction(command)
 EmailAction(to, subject, body, attachments...)
+EmailWindowAction(to, subject, body)
 FileAction(op, args...)
+ClipboardHistoryAction(id, paste)
+ScreenshotAction(mode)
 MusicAction(op, args...)
+PasteAction(text)
+WeatherAction(page, desc, copyOnEnter)
+StateAction(op, args...)
 SyncAction(op, args...)
 SystemAction(op)
+AppAction(name, exec, icon)
+AppActionArgs(name, args, icon)
 ```
 
 ### Spotify view
@@ -267,15 +284,15 @@ Uses `playerctl` for MPRIS metadata and `ActionSpec` for controls.
 
 ## Dependencies
 
-Build and runtime packages (Arch):
+Arch packages for source builds and Edwin runtime integrations:
 
 ```bash
-pacman -S go git base-devel gcc pkgconf gtk3 gtk-layer-shell gobject-introspection dbus xdg-utils playerctl yt-dlp aspell hunspell
+sudo pacman -S --needed go git base-devel gcc pkgconf gtk3 gtk-layer-shell gobject-introspection dbus xdg-utils playerctl yt-dlp aspell hunspell
 ```
 
-Go 1.26.1 or newer is required by `go.mod`. The tray uses Edwin's Go D-Bus dependency and requires an active session bus; no libappindicator package is needed. Optional integrations use tools such as `playerctl`, `yt-dlp`, `aspell`, `hunspell`, `grim`, `slurp`, `cliphist`, `wl-clipboard`, `wtype` or `ydotool`, `mpv`, `pass`, and `libnotify` (`notify-send`). Go modules are declared in `go.mod` and fetched during build.
+`install.sh` itself requires `curl` and `awk`; on Arch, install them with `sudo pacman -S --needed curl gawk` if missing. The script installs only `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell`. Install the other listed packages for source builds and runtime support; `dbus` provides the session bus and `xdg-utils` provides `xdg-open`.
 
-On Arch, `install.sh` installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell`. Go and `pkg-config` must already be available; install other packages from the Arch command above as needed.
+Go 1.26.1 or newer is required to build from source. `go.mod` declares gotk4 GTK bindings, gotk4-layer-shell, godbus/dbus, gogpu/systray (locally replaced by `third_party/gogpu-systray`), and yaml.v3; Go fetches these modules during build. The tray requires an active session D-Bus; no libappindicator package is needed. Optional integrations use `playerctl`, `yt-dlp`, `aspell`, `hunspell`, `pdftotext` and `pdftoppm` for PDFs, `libreoffice` or `soffice` for Office page previews, `grim`/`slurp` for screenshots, `fd` (or `find`) for file search, `wl-clipboard`/`xclip`/`xsel` for clipboard access, `wlrctl` or MangoWM `mmsg` for windows/workspaces, `gio` or `kioclient6` for trash, `cliphist`, `wtype` or `ydotool`, `mpv`, `pass`, and `notify-send`.
 
 ## Debug
 
