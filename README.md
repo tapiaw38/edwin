@@ -12,19 +12,17 @@ App launcher for Linux (Wayland/MangoWM).
 - **System tray:** StatusNotifierItem over D-Bus
 - **Config:** YAML (~/.config/edwin/config.yaml)
 
-## Build
+## Install
 
-```bash
-go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
-```
-
-Install directly with:
+Install the precompiled binary from the latest GitHub Release:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tapiaw38/edwin/main/install.sh | sh
 ```
 
-Or clone the repository and run the installer locally:
+The installer downloads the release asset and places it at `~/.local/bin/edwin`; it does not clone the repository or compile source. On Arch, it installs the runtime packages with `sudo pacman`. On other distributions, install equivalent system libraries manually. Add `~/.local/bin` to `PATH` to run `edwin` by name.
+
+To run the same installer from a local checkout:
 
 ```bash
 git clone https://github.com/tapiaw38/edwin.git
@@ -32,7 +30,13 @@ cd edwin
 ./install.sh
 ```
 
-The installer checks for `go`, `pkg-config`, and `git`. Outside an Edwin clone, it clones the latest source into a temporary directory and removes it on exit. On Arch, it installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell` with `sudo pacman`, then builds Edwin and installs it to `~/.local/bin/edwin`. On other distributions, install equivalent system libraries manually; the installer continues with the build. Add `~/.local/bin` to `PATH` to run `edwin` by name.
+## Build from source
+
+For development, build manually:
+
+```bash
+go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
+```
 
 ## Development
 

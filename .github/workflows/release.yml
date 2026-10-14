@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: Install system dependencies
+        run: pacman -Syu --noconfirm --needed go git base-devel gcc pkgconf gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell gobject-introspection
+
+      - uses: actions/checkout@v4
+
+      - name: Build release binary
+        run: go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: edwin
