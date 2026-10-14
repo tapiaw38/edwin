@@ -18,6 +18,16 @@ App launcher for Linux (Wayland/MangoWM).
 go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
 ```
 
+Alternatively, clone the repository and run the installer:
+
+```bash
+git clone https://github.com/tapiaw38/edwin.git
+cd edwin
+./install.sh
+```
+
+The installer checks for `go` and `pkg-config`, installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell` with `sudo pacman` on Arch, builds Edwin, and installs it to `~/.local/bin/edwin`. On other distributions, install equivalent system libraries manually; the installer continues with the build. Add `~/.local/bin` to `PATH` to run `edwin` by name.
+
 ## Development
 
 Format:
@@ -29,7 +39,8 @@ gofmt -w $(find . -name '*.go' -not -path './vendor/*')
 Test:
 
 ```bash
-go test ./...
+go test -mod=mod ./...
+go vet ./...
 ```
 
 ## Run
@@ -40,7 +51,7 @@ go test ./...
 
 ## System Tray
 
-Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-click the tray icon to show or hide the launcher; right-click and choose **Quit** to exit. Closing the launcher window or pressing `Esc` hides it while Edwin keeps running in the tray. Launching Edwin again activates the existing instance and brings its window forward.
+Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-click the tray icon to show or hide the launcher; right-click and choose **Quit** to exit. Closing the launcher window hides it while Edwin keeps running in the tray. `Esc` leaves file-action mode first, then hides the launcher. Launching Edwin again activates the existing instance over D-Bus and brings its window forward.
 
 ## Setup Hotkey
 
@@ -63,87 +74,68 @@ Modules should prefer `ActionSpec` helpers such as `OpenAction`, `CopyAction`, `
 
 ```bash
 edwin/
+├── LICENSE, README.md, go.mod, go.sum
+├── .github/workflows/ci.yml
 ├── cmd/edwin/
-│   ├── main.go             # Entry point and command dispatch
-│   ├── launcher.go         # GTK launcher window
-│   ├── single_instance.go  # D-Bus activation for the running instance
-│   ├── assets/
-│   │   ├── edwin-icon.png  # Project logo
-│   │   └── edwin-tray.png  # Monochrome tray icon
-│   ├── action_executor.go  # Executes modules.ActionSpec values
-│   └── window_*.go         # Focused GTK windows/dialogs
+│   ├── main.go, launcher.go, single_instance.go
+│   ├── action_executor.go, css.go, keys.go, player.go
+│   ├── preview.go, results.go, row.go, search.go, state.go
+│   ├── window_email.go, window_fileop.go
+│   ├── window_largetype.go, window_stats.go
+│   └── assets/ (edwin-icon.png, edwin-tray.png)
 ├── third_party/gogpu-systray/ # Local SNI implementation with ItemIsMenu disabled
 ├── internal/
-│   ├── apps/apps.go        # .desktop file parsing, app search
-│   ├── config/config.go    # YAML config, CSS generation, hotkey setup
-│   ├── history/history.go  # App launch frequency tracking
-│   ├── platform/
-│   │   └── commands/       # Wrapper around os/exec
+│   ├── apps/apps.go
+│   ├── config/ (config.go, paths.go, theme.go)
+│   ├── history/history.go
+│   ├── platform/commands/commands.go
 │   └── modules/
-│       ├── modules.go      # Result, ActionSpec, registries
-│       ├── calc.go         # Calculator (2+2)
-│       ├── web.go          # Web shortcuts (g, yt, gh, etc.)
-│       ├── system.go       # System commands (lock, shutdown, etc.)
-│       ├── shell.go        # Shell execution (> command)
-│       ├── files.go        # File search (f prefix)
-│       ├── file_actions.go # File actions + buffer
-│       ├── file_ops.go     # Rename/copy/move operations
-│       ├── navigation.go   # Folder navigation
-│       ├── clipboard.go    # Clipboard history (clip/cb prefix)
-│       ├── snippets.go     # Text expansion (;keyword)
-│       ├── dictionary.go   # Word definitions (define/def)
-│       ├── spell.go        # Spelling suggestions (spell prefix)
-│       ├── recent.go       # Recent documents
-│       ├── large_type.go   # Large Type overlay
-│       ├── help.go         # Built-in help
-│       ├── contacts.go     # Local vCard contacts
-│       ├── email.go        # Email compose helpers
-│       ├── stats.go        # Usage stats
-│       ├── sync.go         # Settings sync helpers
-│       ├── preview.go      # Preview pane content
-│       ├── music.go        # Local music search (m prefix)
-│       ├── youtube.go      # YouTube video search + thumbnails (yt prefix)
-│       └── spotify.go      # Music control (sp prefix)
+│       ├── modules.go, registry.go, query.go, limits.go, timeouts.go
+│       ├── bookmarks.go, calc.go, contacts.go, devtools.go
+│       ├── dictionary.go, email.go, emoji.go, files.go
+│       ├── file_actions.go, file_ops.go, navigation.go
+│       ├── clipboard.go, snippets.go, spell.go, recent.go, help.go
+│       ├── large_type.go, stats.go, status.go, sync.go, system.go, text.go
+│       ├── kill.go, pass.go, ssh.go, screenshot.go, timer.go, units.go
+│       ├── weather.go, web.go, window.go
+│       └── music.go, spotify.go, youtube.go, chrome_session.go, firefox_session.go
 ```
 
 ## Features & Prefixes
 
 | Prefix            | Feature                       | Example                                                        |
 | ----------------- | ----------------------------- | -------------------------------------------------------------- |
-| (none)            | App search                    | `firefox`                                                      |
+| (none)            | App search, calculator        | `firefox`, `2+2`                                                |
 | `>`               | Shell command                 | `> htop`                                                       |
-| `;`               | Snippet                       | `;email`                                                       |
-| `f`               | File search                   | `f readme`                                                     |
+| `;`/`snip`        | Snippet                       | `;email`, `snip email`                                          |
+| `f`/`file`        | File search                   | `f readme`                                                     |
 | `Tab`             | File actions                  | select file, press `Tab`                                       |
 | file op window    | Visual file ops               | Tab -> Rename/Copy/Move                                        |
-| `nav`             | Folder navigation             | `nav ~/Downloads`                                              |
+| `nav`/`browse`    | Folder navigation             | `nav ~/Downloads`                                              |
 | `pick`            | Destination picker            | `pick copy source \| ~/Downloads`                              |
 | `rename`          | Rename file                   | `rename source \| new-name`                                    |
 | `copy`            | Copy file                     | `copy source \| target`                                        |
 | `move`            | Move file                     | `move source \| target`                                        |
 | `undo`            | Undo last file operation      | `undo`                                                         |
 | `status`          | Last action/error             | `status`                                                       |
-| `buffer`          | File buffer                   | `buffer`                                                       |
+| `buffer`/`buf`    | File buffer                   | `buffer`                                                       |
 | `recent`          | Recent documents              | `recent invoice`, `recent app firefox`                         |
-| `large`           | Large Type                    | `large 555-1234`                                               |
+| `large`/`type`/`lt` | Large Type                  | `large 555-1234`                                               |
 | `large all`       | Large Type all monitors       | `large all 555-1234`                                           |
-| `help`            | Help                          | `help`                                                         |
-| `contact`         | Contacts                      | `contact Ada`, `contact carddav`                               |
-| `email`           | Email composer + attachments  | `email contact \| Subject \| Body`                             |
-| `stats`           | Usage Stats                   | `stats`                                                        |
-| `sync`            | Sync Settings                 | `sync`, `sync import ~/edwin-settings.zip`                     |
-| `clip`            | Clipboard                     | `clip`                                                         |
-| `define`          | Dictionary                    | `define word`                                                  |
-| `spell`           | Spelling                      | `spell recieve`                                                |
-| `sp`              | Spotify/Music                 | `sp`                                                           |
-| `yp`              | YouTube player controls       | `yp`                                                           |
-| `m`               | Local music                   | `m song`, `m artists`, `m artist name`, `m albums`, `m genres` |
-| `mq`              | Music queue                   | `mq`, play with mpv                                            |
-| `g`               | Google search                 | `g query`                                                      |
-| `yt`              | YouTube videos                | `yt video`                                                     |
-| `gh`              | GitHub                        | `gh repo`                                                      |
-| `lock`            | Lock screen                   | `lock`                                                         |
-| `shutdown`        | Shutdown                      | `shutdown`                                                     |
+| `help`/`?`        | Help                          | `help`                                                         |
+| `contact(s)`      | Contacts                      | `contact Ada`, `contacts`                                      |
+| `email`/`mail`    | Email composer + attachments  | `email contact \| Subject \| Body`                             |
+| `stats`/`usage`   | Usage Stats                   | `stats`                                                        |
+| `sync`/`settings sync` | Sync Settings             | `sync`, `sync import ~/edwin-settings.zip`                     |
+| `clip`/`clipboard`/`cb`/`paste` | Clipboard       | `clip`, `cb query`, `paste query`                              |
+| `define`/`def`    | Dictionary                    | `define word`                                                  |
+| `spell`/`spelling` | Spelling                     | `spell recieve`                                                |
+| `sp`/`spotify`    | Spotify controls/status       | `sp`, `sp status`                                              |
+| `yp`/`youtube player` | YouTube player controls    | `yp play`, `yp status`                                         |
+| `m`/`music`       | Local music                   | `m song`, `m artists`, `m artist name`, `m albums`, `m genres` |
+| `mq`/`music queue`/`queue music` | Music queue      | `mq`, `music queue`                                            |
+| web shortcuts     | Web and YouTube search        | `g`, `yt`, `gh`, `wiki`, `ddg`, `r`, `so` (default keys)       |
+| system commands   | Session/power actions         | `lock`, `sleep`, `hibernate`, `reboot`, `shutdown`, `logout`, `trash` |
 | `emoji`           | Emoji picker                  | `emoji fire`                                                   |
 | `b64`/`b64d`      | Base64 encode/decode          | `b64 hello`                                                    |
 | `url`/`urld`      | URL encode/decode             | `url a b&c`                                                    |
@@ -156,12 +148,12 @@ edwin/
 | `screenshot`/`ss` | Screenshot (grim/slurp)       | `ss`                                                           |
 | `w`               | Windows or MangoWM workspaces | `w`, `w firefox`, `w 2`                                        |
 | `timer`           | Countdown -> notification     | `timer 5m`                                                     |
-| `wt`              | Weather from wttr.in          | `wt`, `wt Berlin`                                              |
+| `wt`/`weather`    | Weather from wttr.in          | `wt`, `weather Berlin`                                         |
 | `pass`            | Password store (pass)         | `pass github`                                                  |
 | `bm`              | Browser bookmarks             | `bm docs`                                                      |
 
 Quick Look: press `Shift`; PDF/doc previews show page/zoom controls, and `PageUp/PageDown` plus `+/-` also work.
-File ops: Tab on a file, then Rename/Copy/Move opens a visual picker with breadcrumbs and folder browsing.
+File ops: `Tab` on a file opens actions. `Add to Buffer`, `Copy Path`, `Rename...`, `Copy To...`, `Move To...`, and `Move to Trash` keep the launcher visible. `Open`, `Reveal in Files`, and `Email File` hide it after the action. Rename/copy/move pickers include breadcrumbs and folder browsing.
 
 ## Config
 
@@ -169,9 +161,17 @@ Location: `~/.config/edwin/config.yaml`
 
 Color themes: `edwin` (default), `dark`, `midnight`, `light`, and `classic`.
 
-The `edwin` preset takes its colors from the butler-in-a-tuxedo app icon (`cmd/edwin/assets/edwin-icon.png`): `background_color: "24, 26, 34"`, `entry_background: "rgba(208, 193, 180, 0.2)"`, `focus_border_color: "245, 215, 140"`, `text_color: "#fdf2d6"`, `selection_color: "208, 193, 180"`, and `desc_color: "rgba(253, 242, 214, 0.62)"`.
+The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/edwin/assets/edwin-icon.png`). Preset color values:
 
-`theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
+| Theme | Background RGB / alpha | Entry background | Focus border RGB | Text | Selection RGB | Description text |
+| ----- | --------------------- | ---------------- | ---------------- | ---- | ------------- | ---------------- |
+| `dark` | `30, 30, 40` / `0.95` | `rgba(255, 255, 255, 0.1)` | `100, 150, 255` | `white` | `100, 150, 255` | `rgba(255, 255, 255, 0.6)` |
+| `midnight` | `8, 8, 12` / `0.97` | `rgba(255, 255, 255, 0.07)` | `40, 55, 95` | `white` | `40, 55, 95` | `rgba(255, 255, 255, 0.5)` |
+| `light` | `245, 245, 248` / `0.97` | `rgba(0, 0, 0, 0.06)` | `90, 140, 255` | `#1c1c1e` | `90, 140, 255` | `rgba(0, 0, 0, 0.55)` |
+| `classic` | `238, 232, 213` / `0.97` | `rgba(0, 0, 0, 0.05)` | `38, 139, 210` | `#073642` | `38, 139, 210` | `rgba(7, 54, 66, 0.6)` |
+| `edwin` | `24, 26, 34` / `0.97` | `rgba(208, 193, 180, 0.2)` | `245, 215, 140` | `#fdf2d6` | `208, 193, 180` | `rgba(253, 242, 214, 0.62)` |
+
+`theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. `selection_color` is rendered with 0.3 alpha. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
 
 ```yaml
 width: 600
@@ -200,7 +200,7 @@ web_shortcuts:
     icon: web-browser
 ```
 
-`file_manager` is optional. Edwin appends the folder path to this command when revealing a file; when unset, it uses `xdg-open`.
+`file_manager` is optional. Edwin splits it on spaces and appends the folder path when opening a folder or revealing a file; when unset, it uses `xdg-open`.
 
 ## Key Files to Modify
 
@@ -257,17 +257,15 @@ Uses `playerctl` for MPRIS metadata and `ActionSpec` for controls.
 
 ## Dependencies
 
-System packages (Arch):
+Build and runtime packages (Arch):
 
 ```bash
-pacman -S gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell
+pacman -S go git base-devel gcc pkgconf gtk3 gtk-layer-shell gobject-introspection dbus xdg-utils playerctl yt-dlp aspell hunspell
 ```
 
-Go modules:
+Go 1.26.1 or newer is required by `go.mod`. The tray uses Edwin's Go D-Bus dependency and requires an active session bus; no libappindicator package is needed. Optional integrations use tools such as `playerctl`, `yt-dlp`, `aspell`, `hunspell`, `grim`, `slurp`, `cliphist`, `wl-clipboard`, `wtype` or `ydotool`, `mpv`, `pass`, and `libnotify` (`notify-send`). Go modules are declared in `go.mod` and fetched during build.
 
-```bash
-go mod tidy
-```
+On Arch, `install.sh` installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell`. Go and `pkg-config` must already be available; install other packages from the Arch command above as needed.
 
 ## Debug
 
