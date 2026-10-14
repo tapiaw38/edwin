@@ -18,7 +18,13 @@ App launcher for Linux (Wayland/MangoWM).
 go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
 ```
 
-Alternatively, clone the repository and run the installer:
+Install directly with:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tapiaw38/edwin/main/install.sh | sh
+```
+
+Or clone the repository and run the installer locally:
 
 ```bash
 git clone https://github.com/tapiaw38/edwin.git
@@ -26,7 +32,7 @@ cd edwin
 ./install.sh
 ```
 
-The installer checks for `go` and `pkg-config`, installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell` with `sudo pacman` on Arch, builds Edwin, and installs it to `~/.local/bin/edwin`. On other distributions, install equivalent system libraries manually; the installer continues with the build. Add `~/.local/bin` to `PATH` to run `edwin` by name.
+The installer checks for `go`, `pkg-config`, and `git`. Outside an Edwin clone, it clones the latest source into a temporary directory and removes it on exit. On Arch, it installs `gtk3`, `gtk-layer-shell`, `playerctl`, `yt-dlp`, `aspell`, and `hunspell` with `sudo pacman`, then builds Edwin and installs it to `~/.local/bin/edwin`. On other distributions, install equivalent system libraries manually; the installer continues with the build. Add `~/.local/bin` to `PATH` to run `edwin` by name.
 
 ## Development
 
