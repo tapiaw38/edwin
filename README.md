@@ -207,6 +207,7 @@ desc_color: "rgba(253, 242, 214, 0.62)"
 show_icons: true
 icon_size: 24
 margin_top: 100
+position: top
 history_boost: 3
 hotkey: "SUPER,s"
 spell_language: "en"
@@ -219,6 +220,8 @@ web_shortcuts:
 ```
 
 `file_manager` is optional. Edwin splits it on spaces and appends the folder path when opening a folder or revealing a file; when unset, it uses `xdg-open`.
+
+`position` accepts `top` (default), `center`, or `bottom`. Each time the hidden launcher opens, it fades in over about 180 ms. `top` slides down from the top edge while fading in; `bottom` slides up from the bottom edge while fading in; `center` fades in without sliding, with the collapsed input's bottom edge fixed just above the monitor's vertical center so results and previews grow downward. Invalid values use `top`. `margin_top` remains accepted for existing config files but no longer affects launcher position.
 
 ## Key Files to Modify
 

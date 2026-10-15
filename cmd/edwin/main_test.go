@@ -49,3 +49,9 @@ func TestArgAt(t *testing.T) {
 		}
 	}
 }
+
+func TestCenteredInputTopMargin(t *testing.T) {
+	if got := centeredInputTopMargin(1080, 82, 32); got != 344 {
+		t.Errorf("centeredInputTopMargin(1080, 82, 32) = %d, want 344", got)
+	}
+}

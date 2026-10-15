@@ -16,10 +16,14 @@ import (
 )
 
 const (
-	searchDebounce = 50 * time.Millisecond
+	searchDebounce        = 50 * time.Millisecond
+	showAnimationSteps    = 12
+	showAnimationInterval = 15
 
-	resultsHeight = 288
-	previewHeight = 232
+	resultsHeight  = 288
+	previewHeight  = 232
+	mainBoxSpacing = 8
+	mainBoxMargin  = 12
 
 	previewScaleDefault = 360
 	previewScaleMin     = 180
@@ -33,6 +37,17 @@ const (
 //go:embed assets/edwin-tray.png
 var trayIcon []byte
 var mainWindow *gtk.Window
+
+type positionState struct {
+	sequence      uint64
+	monitorHeight int
+	centerInset   int
+	edge          gtklayershell.Edge
+	targetMargin  int
+	animating     bool
+}
+
+var launcherPosition positionState
 
 func runLauncher() {
 	activationRequests := make(chan struct{}, 1)
@@ -65,11 +80,11 @@ func runLauncher() {
 
 	window := newLauncherWindow()
 	mainWindow = window
-	mainBox := gtk.NewBox(gtk.OrientationVertical, 8)
-	mainBox.SetMarginStart(12)
-	mainBox.SetMarginEnd(12)
-	mainBox.SetMarginTop(12)
-	mainBox.SetMarginBottom(12)
+	mainBox := gtk.NewBox(gtk.OrientationVertical, mainBoxSpacing)
+	mainBox.SetMarginStart(mainBoxMargin)
+	mainBox.SetMarginEnd(mainBoxMargin)
+	mainBox.SetMarginTop(mainBoxMargin)
+	mainBox.SetMarginBottom(mainBoxMargin)
 
 	createSpotifyView()
 	entry := buildSearchEntry()
@@ -78,7 +93,8 @@ func runLauncher() {
 	connectKeyBindings(window)
 
 	window.ConnectDeleteEvent(func(_ *gdk.Event) bool {
-		return window.HideOnDelete()
+		hideLauncher(window)
+		return true
 	})
 
 	mainBox.PackStart(entry, false, false, 0)
@@ -88,11 +104,11 @@ func runLauncher() {
 	window.Add(mainBox)
 
 	loadCSS()
-
+	window.SetOpacity(0)
 	window.ShowAll()
-	spotifyView.Hide()
-	resultsScroll.Hide()
+	hideLauncher(window)
 	entry.GrabFocus()
+	animateShow(window)
 	tray := systray.New()
 	menu := systray.NewMenu()
 	menu.Add("Quit", func() {
@@ -101,10 +117,9 @@ func runLauncher() {
 	tray.SetIcon(trayIcon).SetTooltip("Edwin").OnClick(func() {
 		glib.IdleAdd(func() {
 			if window.IsVisible() {
-				window.Hide()
+				hideLauncher(window)
 			} else {
-				window.Show()
-				window.Present()
+				animateShow(window)
 				entry.GrabFocus()
 			}
 		})
@@ -112,8 +127,7 @@ func runLauncher() {
 	go func() {
 		for range activationRequests {
 			glib.IdleAdd(func() {
-				window.Show()
-				window.Present()
+				animateShow(window)
 				entry.GrabFocus()
 			})
 		}
@@ -133,9 +147,140 @@ func newLauncherWindow() *gtk.Window {
 	gtklayershell.InitForWindow(window)
 	gtklayershell.SetLayer(window, gtklayershell.LayerShellLayerTop)
 	gtklayershell.SetKeyboardMode(window, gtklayershell.LayerShellKeyboardModeExclusive)
-	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeTop, true)
-	gtklayershell.SetMargin(window, gtklayershell.LayerShellEdgeTop, config.Current.MarginTop)
 	return window
+}
+
+func animateShow(window *gtk.Window) {
+	if window.IsVisible() {
+		window.Present()
+		return
+	}
+	launcherPosition.sequence++
+	sequence := launcherPosition.sequence
+	position := config.Current.Position
+	edge := gtklayershell.LayerShellEdgeTop
+	if position == "bottom" {
+		edge = gtklayershell.LayerShellEdgeBottom
+	} else if position != "center" {
+		position = "top"
+	}
+	display := gdk.DisplayGetDefault()
+	monitorHeight := 0
+	geometryHeight := 0
+	workareaHeight := 0
+	centerInset := 0
+	if display != nil {
+		monitor := display.PrimaryMonitor()
+		if monitor == nil && display.NMonitors() > 0 {
+			monitor = display.Monitor(0)
+		}
+		if monitor != nil {
+			gtklayershell.SetMonitor(window, monitor)
+			if geometry := monitor.Geometry(); geometry != nil {
+				geometryHeight = geometry.Height()
+				if workarea := monitor.Workarea(); workarea != nil {
+					workareaHeight = workarea.Height()
+				}
+				if workareaHeight > 0 && workareaHeight < geometryHeight {
+					monitorHeight = workareaHeight
+				} else {
+					monitorHeight = geometryHeight
+					centerInset = 32
+				}
+			}
+		}
+	}
+	if monitorHeight <= 0 {
+		if screen := gdk.ScreenGetDefault(); screen != nil && screen.Height() > 0 {
+			monitorHeight = screen.Height()
+			centerInset = 32
+		}
+	}
+	if monitorHeight <= 0 {
+		monitorHeight = 1080
+		centerInset = 32
+	}
+	launcherPosition.monitorHeight = monitorHeight
+	launcherPosition.centerInset = centerInset
+	launcherPosition.edge = edge
+	launcherPosition.targetMargin = 0
+	launcherPosition.animating = true
+	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeTop, false)
+	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeBottom, false)
+	gtklayershell.SetAnchor(window, edge, true)
+	applyPositionMargin(window, edge, launcherPosition.targetMargin)
+	window.SetOpacity(0)
+	window.Show()
+	window.Present()
+	glib.IdleAdd(func() {
+		if sequence != launcherPosition.sequence {
+			return
+		}
+		windowHeight := window.AllocatedHeight()
+		if windowHeight <= 0 {
+			_, windowHeight = window.Size()
+		}
+		if position == "center" {
+			launcherPosition.targetMargin = centeredInputTopMargin(monitorHeight, windowHeight, centerInset)
+			applyPositionMargin(window, edge, launcherPosition.targetMargin)
+		} else {
+			updatePositionForHeight(window, windowHeight, false)
+		}
+		step := 0
+		glib.TimeoutAdd(showAnimationInterval, func() bool {
+			if sequence != launcherPosition.sequence || !window.IsVisible() {
+				return false
+			}
+			step++
+			progress := float64(step) / showAnimationSteps
+			window.SetOpacity(progress)
+			if position != "center" {
+				margin := int(float64(launcherPosition.targetMargin) * progress)
+				applyPositionMargin(window, edge, margin)
+			}
+			if step >= showAnimationSteps {
+				launcherPosition.animating = false
+				window.SetOpacity(1)
+				if position != "center" {
+					applyPositionMargin(window, edge, launcherPosition.targetMargin)
+				}
+				return false
+			}
+			return true
+		})
+	})
+}
+
+func centeredInputTopMargin(monitorHeight, collapsedHeight, centerInset int) int {
+	margin := monitorHeight/2 - centerInset - 2*collapsedHeight
+	if margin < 0 {
+		return 0
+	}
+	return margin
+}
+
+func updatePositionForHeight(window *gtk.Window, windowHeight int, apply bool) int {
+	margin := (launcherPosition.monitorHeight-windowHeight)/2 - launcherPosition.centerInset
+	if margin < 0 {
+		margin = 0
+	}
+	launcherPosition.targetMargin = margin
+	if apply {
+		applyPositionMargin(window, launcherPosition.edge, margin)
+	}
+	return margin
+}
+
+func applyPositionMargin(window *gtk.Window, edge gtklayershell.Edge, margin int) {
+	gtklayershell.SetMargin(window, edge, margin)
+}
+
+func hideLauncher(window *gtk.Window) {
+	searchEntry.SetText("")
+	resultsScroll.Hide()
+	spotifyView.Hide()
+	previewBox.Hide()
+	window.Hide()
 }
 
 func buildSearchEntry() *gtk.Entry {
@@ -247,7 +392,7 @@ func connectKeyBindings(window *gtk.Window) {
 				updateResults(searchEntry.Text())
 				return true
 			}
-			window.Hide()
+			hideLauncher(window)
 			return true
 		case gdk.KEY_Down:
 			selectNext()

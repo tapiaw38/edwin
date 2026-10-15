@@ -9,6 +9,9 @@ func TestEdwinThemeIsDefault(t *testing.T) {
 	if defaultConfig.Theme != "edwin" {
 		t.Fatalf("default theme = %q, want edwin", defaultConfig.Theme)
 	}
+	if defaultConfig.Position != "top" {
+		t.Fatalf("default position = %q, want top", defaultConfig.Position)
+	}
 	if got := ColorPresets["edwin"].FocusBorderColor; got != "245, 215, 140" {
 		t.Fatalf("edwin focus border = %q, want 245, 215, 140", got)
 	}

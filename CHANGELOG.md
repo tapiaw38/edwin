@@ -6,6 +6,17 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-14
+
+### Added
+
+- Added configurable launcher positioning with animated top and bottom slides and a center fade-in.
+
+### Fixed
+
+- Fixed launcher positioning across monitor work areas and changing window states.
+- Reset search and collapse result, Spotify, and preview views when hiding the launcher so stale searches cannot affect its next position.
+
 ## [0.1.0] - 2026-10-13
 
 ### Added

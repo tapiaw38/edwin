@@ -27,6 +27,7 @@ type Config struct {
 	ShowIcons     bool   `yaml:"show_icons"`
 	IconSize      int    `yaml:"icon_size"`
 	MarginTop     int    `yaml:"margin_top"`
+	Position      string `yaml:"position"`
 	HistoryBoost  int    `yaml:"history_boost"`
 	SpellLanguage string `yaml:"spell_language"`
 
@@ -56,6 +57,7 @@ var defaultConfig = Config{
 	ShowIcons:        true,
 	IconSize:         24,
 	MarginTop:        100,
+	Position:         "top",
 	HistoryBoost:     3,
 	SpellLanguage:    "en",
 	Hotkey:           "Alt,space",
