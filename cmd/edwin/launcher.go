@@ -276,7 +276,13 @@ func applyPositionMargin(window *gtk.Window, edge gtklayershell.Edge, margin int
 }
 
 func hideLauncher(window *gtk.Window) {
-	searchEntry.SetText("")
+	inActionMode = false
+	quickLookActive = false
+	if searchEntry.Text() == "" {
+		updateResults("")
+	} else {
+		searchEntry.SetText("")
+	}
 	resultsScroll.Hide()
 	spotifyView.Hide()
 	previewBox.Hide()

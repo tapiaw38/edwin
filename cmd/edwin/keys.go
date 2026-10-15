@@ -97,7 +97,7 @@ func executeSelected(window *gtk.Window) {
 	}
 	executeActionSpec(r.ActionSpec)
 	if !r.KeepOpen {
-		window.Hide()
+		hideLauncher(window)
 		return
 	}
 	if inActionMode {

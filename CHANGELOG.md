@@ -6,6 +6,12 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-15
+
+### Fixed
+
+- Invalidated pending searches when hiding the launcher to prevent late async results from restoring expanded layout and shifting its next position.
+
 ## [0.2.0] - 2026-10-14
 
 ### Added
