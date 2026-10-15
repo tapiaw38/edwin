@@ -17,7 +17,7 @@ if command -v pacman >/dev/null 2>&1; then
     printf 'Error: sudo is required to install Arch Linux dependencies.\n' >&2
     exit 1
   fi
-  sudo pacman -S --needed gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell
+  sudo pacman -S --needed --noconfirm gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell
 else
   printf 'Warning: pacman not found. Install GTK3, gtk-layer-shell, playerctl, yt-dlp, aspell, and hunspell with your distribution package manager before running Edwin.\n' >&2
 fi

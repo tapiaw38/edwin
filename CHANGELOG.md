@@ -6,6 +6,12 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-15
+
+### Fixed
+
+- Added `--noconfirm` to Arch dependency installation so `pacman` cannot consume the installer script from stdin when piped to `sh`.
+
 ## [0.2.1] - 2026-10-15
 
 ### Fixed
