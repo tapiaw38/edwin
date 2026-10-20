@@ -1,6 +1,7 @@
 # Binary
 /edwin
 /spark
+/.herdr-web-ui/
 
 # Go
 *.exe

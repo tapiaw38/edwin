@@ -6,6 +6,16 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-20
+
+### Added
+
+- Added Alfred-style numbered shortcuts for running the first nine search results, with visual badges and configurable `shortcut_modifier` (default `ctrl+shift`).
+
+### Fixed
+
+- Prevented modified Shift presses used by numbered shortcuts from toggling Quick Look.
+
 ## [0.2.2] - 2026-10-15
 
 ### Fixed

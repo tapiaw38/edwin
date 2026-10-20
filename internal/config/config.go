@@ -31,8 +31,9 @@ type Config struct {
 	HistoryBoost  int    `yaml:"history_boost"`
 	SpellLanguage string `yaml:"spell_language"`
 
-	Hotkey      string `yaml:"hotkey"`
-	FileManager string `yaml:"file_manager"`
+	Hotkey           string `yaml:"hotkey"`
+	FileManager      string `yaml:"file_manager"`
+	ShortcutModifier string `yaml:"shortcut_modifier"`
 }
 
 type WebShortcut struct {
@@ -61,6 +62,7 @@ var defaultConfig = Config{
 	HistoryBoost:     3,
 	SpellLanguage:    "en",
 	Hotkey:           "Alt,space",
+	ShortcutModifier: "ctrl+shift",
 	WebShortcuts: map[string]WebShortcut{
 		"g":    {Name: "Google", URL: "https://www.google.com/search?q=%s", Icon: "web-browser"},
 		"yt":   {Name: "YouTube", URL: "https://www.youtube.com/results?search_query=%s", Icon: "youtube"},
@@ -284,6 +286,10 @@ func GetCSS() string {
 		#edwin-desc {
 			color: @edwin-desc-color;
 			font-size: %dpx;
+		}
+		#edwin-shortcut-badge {
+			color: @edwin-desc-color;
+			font-size: 11px;
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,
 		c.FocusBorderColor, c.EntryBackground, c.DescColor,

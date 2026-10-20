@@ -15,7 +15,13 @@ import (
 
 const dragIconSize = 96
 
-func createResultRow(r modules.Result) *gtk.ListBoxRow {
+var shortcutBadges map[int]*gtk.Label
+
+func resetShortcutBadges() {
+	shortcutBadges = make(map[int]*gtk.Label)
+}
+
+func createResultRow(r modules.Result, index int) *gtk.ListBoxRow {
 	row := gtk.NewListBoxRow()
 	row.SetName("edwin-row")
 
@@ -48,6 +54,17 @@ func createResultRow(r modules.Result) *gtk.ListBoxRow {
 	}
 
 	hbox.PackStart(vbox, true, true, 0)
+	if index < 9 {
+		badge := gtk.NewLabel(shortcutBadgeText(config.Current.ShortcutModifier, index))
+		badge.SetName("edwin-shortcut-badge")
+		badge.SetXAlign(1)
+		badge.SetWidthChars(4)
+		hbox.PackEnd(badge, false, false, 0)
+		if shortcutBadges == nil {
+			resetShortcutBadges()
+		}
+		shortcutBadges[index] = badge
+	}
 
 	eventBox := gtk.NewEventBox()
 	eventBox.SetVisibleWindow(false)
@@ -55,6 +72,20 @@ func createResultRow(r modules.Result) *gtk.ListBoxRow {
 	row.Add(eventBox)
 	setupFileDragSource(eventBox, r)
 	return row
+}
+
+func updateShortcutBadges(selected *gtk.ListBoxRow) {
+	selectedIndex := -1
+	if selected != nil {
+		selectedIndex = selected.Index()
+	}
+	for index, badge := range shortcutBadges {
+		if index == selectedIndex {
+			badge.SetText("↵")
+		} else {
+			badge.SetText(shortcutBadgeText(config.Current.ShortcutModifier, index))
+		}
+	}
 }
 
 func resultIcon(r modules.Result) gtk.Widgetter {

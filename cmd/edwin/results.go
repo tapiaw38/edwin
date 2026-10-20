@@ -14,6 +14,7 @@ const (
 )
 
 func clearResultRows() {
+	resetShortcutBadges()
 	isClearing = true
 	defer func() { isClearing = false }()
 
@@ -50,8 +51,8 @@ func renderNextResultChunk() bool {
 	start := resultsRenderedN
 	end := min(start+resultBatchSize, len(currentResults))
 
-	for _, r := range currentResults[start:end] {
-		row := createResultRow(r)
+	for i, r := range currentResults[start:end] {
+		row := createResultRow(r, start+i)
 		listBox.Add(row)
 		row.ShowAll()
 	}

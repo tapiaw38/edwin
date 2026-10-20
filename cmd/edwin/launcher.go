@@ -328,6 +328,7 @@ func buildResultsList() {
 	resultsScroll.VAdjustment().Connect("value-changed", maybeLoadMoreResults)
 
 	listBox.Connect("row-selected", func(_ *gtk.ListBox, row *gtk.ListBoxRow) {
+		updateShortcutBadges(row)
 		if quickLookActive {
 			updatePreview(row)
 		} else {
@@ -391,7 +392,11 @@ func buildPreviewToolbar() *gtk.Box {
 
 func connectKeyBindings(window *gtk.Window) {
 	window.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
-		switch event.AsKey().Keyval() {
+		keyEvent := event.AsKey()
+		if executeShortcut(window, keyEvent.Keyval(), keyEvent.HardwareKeycode(), keyEvent.State()) {
+			return true
+		}
+		switch keyEvent.Keyval() {
 		case gdk.KEY_Escape:
 			if inActionMode {
 				inActionMode = false
@@ -413,6 +418,9 @@ func connectKeyBindings(window *gtk.Window) {
 			showSelectedFileActions()
 			return true
 		case gdk.KEY_Shift_L, gdk.KEY_Shift_R:
+			if !shouldToggleQuickLookOnShift(keyEvent.State()) {
+				return false
+			}
 			toggleQuickLook()
 			return true
 		case gdk.KEY_Page_Down, gdk.KEY_Right:
