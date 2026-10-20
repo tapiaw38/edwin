@@ -60,6 +60,15 @@ func TestCenteredInputTopMargin(t *testing.T) {
 	}
 }
 
+func TestCenteredLeftMargin(t *testing.T) {
+	if got := centeredLeftMargin(1920, 600); got != 660 {
+		t.Fatalf("centeredLeftMargin(1920, 600) = %d, want 660", got)
+	}
+	if got := centeredLeftMargin(500, 600); got != 0 {
+		t.Fatalf("centeredLeftMargin(500, 600) = %d, want 0", got)
+	}
+}
+
 func TestShortcutNumber(t *testing.T) {
 	tests := []struct {
 		keyval uint

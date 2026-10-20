@@ -6,6 +6,22 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-20
+
+### Added
+
+- Added a 300px right sidebar shared by file Quick Look and player previews, with a fade-in when shown.
+- Kept the search input and results in a fixed-width left column so opening the sidebar expands the window to the right without shifting the input.
+- Anchored the launcher to its initial left position for all configured vertical positions.
+
+### Changed
+
+- Moved player controls into the left results column and placed cover art and track metadata in the sidebar.
+
+### Fixed
+
+- Prevented the launcher from sliding in from the left by applying its centered left margin before showing it.
+
 ## [0.3.0] - 2026-10-20
 
 ### Added

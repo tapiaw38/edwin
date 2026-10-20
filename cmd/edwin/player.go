@@ -12,8 +12,7 @@ import (
 )
 
 const (
-	playerArtSmallSize = 64
-	playerArtBigSize   = 150
+	playerArtBigSize = 180
 
 	playerRefreshDelay = 300 * time.Millisecond
 )
@@ -21,15 +20,11 @@ const (
 func createSpotifyView() {
 	spotifyView = gtk.NewBox(gtk.OrientationVertical, 8)
 	spotifyView.SetName("spotify-view")
+	spotifyArtBig = gtk.NewImage()
+	spotifyArtBig.SetSizeRequest(playerArtBigSize, playerArtBigSize)
+	spotifyArtBig.SetHAlign(gtk.AlignCenter)
+	spotifyView.PackStart(spotifyArtBig, false, false, 0)
 
-	header := gtk.NewBox(gtk.OrientationHorizontal, 12)
-	header.SetName("spotify-header")
-
-	spotifyArtSmall = gtk.NewImage()
-	spotifyArtSmall.SetSizeRequest(playerArtSmallSize, playerArtSmallSize)
-	header.PackStart(spotifyArtSmall, false, false, 0)
-
-	infoBox := gtk.NewBox(gtk.OrientationVertical, 4)
 	spotifyTitle = gtk.NewLabel("")
 	spotifyTitle.SetName("spotify-title")
 	spotifyTitle.SetXAlign(0)
@@ -47,21 +42,18 @@ func createSpotifyView() {
 	spotifyStatus.SetName("spotify-status")
 	spotifyStatus.SetXAlign(0)
 
-	infoBox.PackStart(spotifyTitle, false, false, 0)
-	infoBox.PackStart(spotifyArtist, false, false, 0)
-	infoBox.PackStart(spotifyAlbum, false, false, 0)
-	infoBox.PackStart(spotifyStatus, false, false, 0)
-	header.PackStart(infoBox, true, true, 0)
-
-	header.PackEnd(buildPlayerControls(), false, false, 0)
-
-	spotifyView.PackStart(header, false, false, 0)
-
-	content := gtk.NewBox(gtk.OrientationHorizontal, 12)
+	spotifyView.PackStart(spotifyTitle, false, false, 0)
+	spotifyView.PackStart(spotifyArtist, false, false, 0)
+	spotifyView.PackStart(spotifyAlbum, false, false, 0)
+	spotifyView.PackStart(spotifyStatus, false, false, 0)
 
 	spotifyList = gtk.NewListBox()
 	spotifyList.SetName("spotify-list")
 	spotifyList.SetSelectionMode(gtk.SelectionSingle)
+	spotifyScroll = gtk.NewScrolledWindow(nil, nil)
+	spotifyScroll.SetPolicy(gtk.PolicyNever, gtk.PolicyAutomatic)
+	spotifyScroll.SetNoShowAll(true)
+	spotifyScroll.Add(spotifyList)
 
 	for _, ctrl := range modules.PlayerControls(playerMode) {
 		row := createSpotifyControlRow(ctrl)
@@ -77,43 +69,6 @@ func createSpotifyView() {
 		}
 	})
 
-	content.PackStart(spotifyList, true, true, 0)
-
-	artFrame := gtk.NewBox(gtk.OrientationVertical, 0)
-	artFrame.SetHAlign(gtk.AlignCenter)
-	artFrame.SetVAlign(gtk.AlignCenter)
-	spotifyArtBig = gtk.NewImage()
-	spotifyArtBig.SetSizeRequest(playerArtBigSize, playerArtBigSize)
-	artFrame.PackStart(spotifyArtBig, false, false, 0)
-	content.PackEnd(artFrame, false, false, 0)
-
-	spotifyView.PackStart(content, false, false, 0)
-}
-
-func buildPlayerControls() *gtk.Box {
-	controls := gtk.NewBox(gtk.OrientationHorizontal, 8)
-	controls.SetHAlign(gtk.AlignEnd)
-	controls.SetVAlign(gtk.AlignCenter)
-
-	buttons := []struct {
-		label string
-		index int
-	}{
-		{"⏮", 2},
-		{"⏯", 0},
-		{"⏭", 1},
-	}
-	for _, b := range buttons {
-		btn := gtk.NewButton()
-		btn.SetName("spotify-control")
-		btn.SetLabel(b.label)
-		idx := b.index
-		btn.Connect("clicked", func() {
-			runPlayerResultAction(modules.PlayerControls(playerMode)[idx])
-		})
-		controls.PackStart(btn, false, false, 0)
-	}
-	return controls
 }
 
 func createSpotifyControlRow(r modules.Result) *gtk.ListBoxRow {
@@ -154,6 +109,8 @@ func showPlayerView(kind modules.PlayerKind) {
 	playerMode = kind
 	inSpotifyMode = true
 	resultsScroll.Hide()
+	spotifyList.Show()
+	spotifyScroll.Show()
 	hidePreview()
 	refreshPlayerControls()
 
@@ -161,6 +118,7 @@ func showPlayerView(kind modules.PlayerKind) {
 
 	spotifyView.Show()
 	spotifyView.ShowAll()
+	spotifyScroll.ShowAll()
 
 	if first := spotifyList.RowAtIndex(0); first != nil {
 		spotifyList.SelectRow(first)
@@ -187,6 +145,9 @@ func refreshPlayerControls() {
 
 func hideSpotifyView() {
 	inSpotifyMode = false
+	if spotifyScroll != nil {
+		spotifyScroll.Hide()
+	}
 	spotifyView.Hide()
 }
 
@@ -216,9 +177,6 @@ func applyPlayerInfo(info *modules.PlayerInfo) {
 	spotifyStatus.SetText(playerStatusIcon(info.Status) + " " + string(info.Status))
 
 	if info.ArtCachePath != "" {
-		if pb, err := gdkpixbuf.NewPixbufFromFileAtSize(info.ArtCachePath, playerArtSmallSize, playerArtSmallSize); err == nil {
-			spotifyArtSmall.SetFromPixbuf(pb)
-		}
 		if pb, err := gdkpixbuf.NewPixbufFromFileAtSize(info.ArtCachePath, playerArtBigSize, playerArtBigSize); err == nil {
 			spotifyArtBig.SetFromPixbuf(pb)
 		}
@@ -243,7 +201,6 @@ func showPlayerDisconnected() {
 	}
 	spotifyArtist.SetText("")
 	spotifyAlbum.SetText("")
-	spotifyArtSmall.Clear()
 	spotifyArtBig.Clear()
 }
 

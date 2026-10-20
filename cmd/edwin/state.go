@@ -16,6 +16,7 @@ var (
 	resultsScroll  *gtk.ScrolledWindow
 	searchEntry    *gtk.Entry
 	previewBox     *gtk.Box
+	sidePanel      *gtk.Box
 	previewToolbar *gtk.Box
 	previewMeta    *gtk.Label
 	previewImage   *gtk.Image
@@ -48,8 +49,9 @@ var (
 
 var (
 	spotifyView       *gtk.Box
+	spotifyScroll     *gtk.ScrolledWindow
+	sidePanelSequence uint64
 	spotifyArtBig     *gtk.Image
-	spotifyArtSmall   *gtk.Image
 	spotifyTitle      *gtk.Label
 	spotifyArtist     *gtk.Label
 	spotifyAlbum      *gtk.Label

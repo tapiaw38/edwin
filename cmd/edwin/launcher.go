@@ -22,6 +22,7 @@ const (
 
 	resultsHeight  = 288
 	previewHeight  = 232
+	sidePanelWidth = 300
 	mainBoxSpacing = 8
 	mainBoxMargin  = 12
 
@@ -80,7 +81,7 @@ func runLauncher() {
 
 	window := newLauncherWindow()
 	mainWindow = window
-	mainBox := gtk.NewBox(gtk.OrientationVertical, mainBoxSpacing)
+	mainBox := gtk.NewBox(gtk.OrientationHorizontal, mainBoxSpacing)
 	mainBox.SetMarginStart(mainBoxMargin)
 	mainBox.SetMarginEnd(mainBoxMargin)
 	mainBox.SetMarginTop(mainBoxMargin)
@@ -89,7 +90,10 @@ func runLauncher() {
 	createSpotifyView()
 	entry := buildSearchEntry()
 	buildResultsList()
+	resultsScroll.SetSizeRequest(config.Current.Width-2*mainBoxMargin, resultsHeight)
 	buildPreviewPane()
+	buildSidePanel()
+	spotifyScroll.SetSizeRequest(config.Current.Width-2*mainBoxMargin, resultsHeight)
 	connectKeyBindings(window)
 
 	window.ConnectDeleteEvent(func(_ *gdk.Event) bool {
@@ -97,10 +101,13 @@ func runLauncher() {
 		return true
 	})
 
-	mainBox.PackStart(entry, false, false, 0)
-	mainBox.PackStart(resultsScroll, false, false, 0)
-	mainBox.PackStart(spotifyView, false, false, 0)
-	mainBox.PackStart(previewBox, false, false, 0)
+	leftColumn := gtk.NewBox(gtk.OrientationVertical, mainBoxSpacing)
+	leftColumn.SetSizeRequest(config.Current.Width-2*mainBoxMargin, -1)
+	leftColumn.PackStart(entry, false, false, 0)
+	leftColumn.PackStart(resultsScroll, true, true, 0)
+	leftColumn.PackStart(spotifyScroll, true, true, 0)
+	mainBox.PackStart(leftColumn, false, false, 0)
+	mainBox.PackEnd(sidePanel, false, false, 0)
 	window.Add(mainBox)
 
 	loadCSS()
@@ -166,6 +173,7 @@ func animateShow(window *gtk.Window) {
 	}
 	display := gdk.DisplayGetDefault()
 	monitorHeight := 0
+	monitorWidth := 0
 	geometryHeight := 0
 	workareaHeight := 0
 	centerInset := 0
@@ -178,6 +186,7 @@ func animateShow(window *gtk.Window) {
 			gtklayershell.SetMonitor(window, monitor)
 			if geometry := monitor.Geometry(); geometry != nil {
 				geometryHeight = geometry.Height()
+				monitorWidth = geometry.Width()
 				if workarea := monitor.Workarea(); workarea != nil {
 					workareaHeight = workarea.Height()
 				}
@@ -193,12 +202,16 @@ func animateShow(window *gtk.Window) {
 	if monitorHeight <= 0 {
 		if screen := gdk.ScreenGetDefault(); screen != nil && screen.Height() > 0 {
 			monitorHeight = screen.Height()
+			monitorWidth = screen.Width()
 			centerInset = 32
 		}
 	}
 	if monitorHeight <= 0 {
 		monitorHeight = 1080
 		centerInset = 32
+	}
+	if monitorWidth <= 0 {
+		monitorWidth = config.Current.Width
 	}
 	launcherPosition.monitorHeight = monitorHeight
 	launcherPosition.centerInset = centerInset
@@ -207,8 +220,11 @@ func animateShow(window *gtk.Window) {
 	launcherPosition.animating = true
 	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeTop, false)
 	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeBottom, false)
+	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeLeft, true)
+	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeRight, false)
 	gtklayershell.SetAnchor(window, edge, true)
 	applyPositionMargin(window, edge, launcherPosition.targetMargin)
+	gtklayershell.SetMargin(window, gtklayershell.LayerShellEdgeLeft, centeredLeftMargin(monitorWidth, config.Current.Width))
 	window.SetOpacity(0)
 	window.Show()
 	window.Present()
@@ -249,6 +265,14 @@ func animateShow(window *gtk.Window) {
 			return true
 		})
 	})
+}
+
+func centeredLeftMargin(monitorWidth, collapsedWidth int) int {
+	margin := (monitorWidth - collapsedWidth) / 2
+	if margin < 0 {
+		return 0
+	}
+	return margin
 }
 
 func centeredInputTopMargin(monitorHeight, collapsedHeight, centerInset int) int {
@@ -361,6 +385,49 @@ func buildPreviewPane() {
 
 	previewBox.PackStart(previewImage, false, false, 0)
 	previewBox.PackStart(previewLabel, false, false, 0)
+}
+
+func buildSidePanel() {
+	sidePanel = gtk.NewBox(gtk.OrientationVertical, 0)
+	sidePanel.SetName("edwin-side-panel")
+	sidePanel.SetSizeRequest(sidePanelWidth, -1)
+	sidePanel.SetNoShowAll(true)
+	sidePanel.PackStart(previewBox, true, true, 0)
+	sidePanel.PackStart(spotifyView, true, true, 0)
+
+	previewBox.ConnectShow(showSidePanel)
+	previewBox.ConnectHide(syncSidePanelVisibility)
+	spotifyView.ConnectShow(showSidePanel)
+	spotifyView.ConnectHide(syncSidePanelVisibility)
+}
+
+func showSidePanel() {
+	sidePanelSequence++
+	sequence := sidePanelSequence
+	sidePanel.SetOpacity(0)
+	sidePanel.Show()
+	step := 0
+	glib.TimeoutAdd(showAnimationInterval, func() bool {
+		if sequence != sidePanelSequence || !sidePanel.Visible() {
+			return false
+		}
+		step++
+		sidePanel.SetOpacity(float64(step) / showAnimationSteps)
+		if step >= showAnimationSteps {
+			sidePanel.SetOpacity(1)
+			return false
+		}
+		return true
+	})
+}
+
+func syncSidePanelVisibility() {
+	if previewBox.Visible() || spotifyView.Visible() {
+		return
+	}
+	sidePanelSequence++
+	sidePanel.SetOpacity(1)
+	sidePanel.Hide()
 }
 
 func buildPreviewToolbar() *gtk.Box {

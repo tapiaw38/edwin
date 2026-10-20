@@ -159,10 +159,17 @@ func selectRow(list *gtk.ListBox, row *gtk.ListBoxRow) {
 }
 
 func scrollToRow(row *gtk.ListBoxRow) {
-	if row == nil || resultsScroll == nil {
+	if row == nil {
 		return
 	}
-	adj := resultsScroll.VAdjustment()
+	scroll := resultsScroll
+	if inSpotifyMode {
+		scroll = spotifyScroll
+	}
+	if scroll == nil {
+		return
+	}
+	adj := scroll.VAdjustment()
 	if adj == nil {
 		return
 	}
