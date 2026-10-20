@@ -40,12 +40,13 @@ var trayIcon []byte
 var mainWindow *gtk.Window
 
 type positionState struct {
-	sequence      uint64
-	monitorHeight int
-	centerInset   int
-	edge          gtklayershell.Edge
-	targetMargin  int
-	animating     bool
+	sequence        uint64
+	monitorHeight   int
+	collapsedHeight int
+	centerInset     int
+	edge            gtklayershell.Edge
+	targetMargin    int
+	animating       bool
 }
 
 var launcherPosition positionState
@@ -172,59 +173,29 @@ func animateShow(window *gtk.Window) {
 		position = "top"
 	}
 	display := gdk.DisplayGetDefault()
-	monitorHeight := 0
-	monitorWidth := 0
-	geometryHeight := 0
-	workareaHeight := 0
-	centerInset := 0
-	if display != nil {
-		monitor := display.PrimaryMonitor()
-		if monitor == nil && display.NMonitors() > 0 {
-			monitor = display.Monitor(0)
-		}
-		if monitor != nil {
-			gtklayershell.SetMonitor(window, monitor)
-			if geometry := monitor.Geometry(); geometry != nil {
-				geometryHeight = geometry.Height()
-				monitorWidth = geometry.Width()
-				if workarea := monitor.Workarea(); workarea != nil {
-					workareaHeight = workarea.Height()
-				}
-				if workareaHeight > 0 && workareaHeight < geometryHeight {
-					monitorHeight = workareaHeight
-				} else {
-					monitorHeight = geometryHeight
-					centerInset = 32
-				}
-			}
-		}
+	estimatedMonitor := fallbackMonitor(display)
+	estimatedHeight, estimatedWidth, estimatedInset := monitorDimensions(estimatedMonitor)
+	collapsedHeight := launcherPosition.collapsedHeight
+	if collapsedHeight <= 0 {
+		collapsedHeight = estimatedCollapsedHeight()
 	}
-	if monitorHeight <= 0 {
-		if screen := gdk.ScreenGetDefault(); screen != nil && screen.Height() > 0 {
-			monitorHeight = screen.Height()
-			monitorWidth = screen.Width()
-			centerInset = 32
-		}
+	estimatedLeftMargin := centeredLeftMargin(estimatedWidth, config.Current.Width)
+	estimatedVerticalMargin := 0
+	if position == "center" {
+		estimatedVerticalMargin = centeredInputTopMargin(estimatedHeight, collapsedHeight, estimatedInset)
 	}
-	if monitorHeight <= 0 {
-		monitorHeight = 1080
-		centerInset = 32
-	}
-	if monitorWidth <= 0 {
-		monitorWidth = config.Current.Width
-	}
-	launcherPosition.monitorHeight = monitorHeight
-	launcherPosition.centerInset = centerInset
 	launcherPosition.edge = edge
-	launcherPosition.targetMargin = 0
+	launcherPosition.targetMargin = estimatedVerticalMargin
+	launcherPosition.monitorHeight = estimatedHeight
+	launcherPosition.centerInset = estimatedInset
 	launcherPosition.animating = true
 	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeTop, false)
 	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeBottom, false)
 	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeLeft, true)
 	gtklayershell.SetAnchor(window, gtklayershell.LayerShellEdgeRight, false)
 	gtklayershell.SetAnchor(window, edge, true)
-	applyPositionMargin(window, edge, launcherPosition.targetMargin)
-	gtklayershell.SetMargin(window, gtklayershell.LayerShellEdgeLeft, centeredLeftMargin(monitorWidth, config.Current.Width))
+	applyPositionMargin(window, edge, estimatedVerticalMargin)
+	gtklayershell.SetMargin(window, gtklayershell.LayerShellEdgeLeft, estimatedLeftMargin)
 	window.SetOpacity(0)
 	window.Show()
 	window.Present()
@@ -232,39 +203,126 @@ func animateShow(window *gtk.Window) {
 		if sequence != launcherPosition.sequence {
 			return
 		}
+		monitor := monitorForWindow(display, window)
+		monitorHeight, monitorWidth, centerInset := monitorDimensions(monitor)
 		windowHeight := window.AllocatedHeight()
 		if windowHeight <= 0 {
 			_, windowHeight = window.Size()
 		}
+		if windowHeight > 0 && launcherIsCollapsed() {
+			launcherPosition.collapsedHeight = windowHeight
+		}
+		launcherPosition.monitorHeight = monitorHeight
+		launcherPosition.centerInset = centerInset
+		actualLeftMargin := centeredLeftMargin(monitorWidth, config.Current.Width)
+		if actualLeftMargin != estimatedLeftMargin {
+			gtklayershell.SetMargin(window, gtklayershell.LayerShellEdgeLeft, actualLeftMargin)
+		}
 		if position == "center" {
-			launcherPosition.targetMargin = centeredInputTopMargin(monitorHeight, windowHeight, centerInset)
-			applyPositionMargin(window, edge, launcherPosition.targetMargin)
+			actualVerticalMargin := centeredInputTopMargin(monitorHeight, windowHeight, centerInset)
+			if actualVerticalMargin != estimatedVerticalMargin {
+				applyPositionMargin(window, edge, actualVerticalMargin)
+			}
+			launcherPosition.targetMargin = actualVerticalMargin
 		} else {
 			updatePositionForHeight(window, windowHeight, false)
 		}
-		step := 0
-		glib.TimeoutAdd(showAnimationInterval, func() bool {
+		glib.TimeoutAdd(24, func() bool {
 			if sequence != launcherPosition.sequence || !window.IsVisible() {
 				return false
 			}
-			step++
-			progress := float64(step) / showAnimationSteps
-			window.SetOpacity(progress)
-			if position != "center" {
-				margin := int(float64(launcherPosition.targetMargin) * progress)
-				applyPositionMargin(window, edge, margin)
-			}
-			if step >= showAnimationSteps {
-				launcherPosition.animating = false
-				window.SetOpacity(1)
-				if position != "center" {
-					applyPositionMargin(window, edge, launcherPosition.targetMargin)
+			step := 0
+			glib.TimeoutAdd(showAnimationInterval, func() bool {
+				if sequence != launcherPosition.sequence || !window.IsVisible() {
+					return false
 				}
-				return false
-			}
-			return true
+				step++
+				progress := float64(step) / showAnimationSteps
+				window.SetOpacity(progress)
+				if position != "center" {
+					margin := int(float64(launcherPosition.targetMargin) * progress)
+					applyPositionMargin(window, edge, margin)
+				}
+				if step >= showAnimationSteps {
+					launcherPosition.animating = false
+					window.SetOpacity(1)
+					if position != "center" {
+						applyPositionMargin(window, edge, launcherPosition.targetMargin)
+					}
+					return false
+				}
+				return true
+			})
+			return false
 		})
 	})
+}
+
+func estimatedCollapsedHeight() int {
+	height := config.Current.FontSize + 2*config.SpacingLarge + 2*mainBoxMargin + 2
+	if height < 1 {
+		return 1
+	}
+	return height
+}
+
+func launcherIsCollapsed() bool {
+	return !resultsScroll.Visible() && !spotifyScroll.Visible() && !previewBox.Visible() && !spotifyView.Visible()
+}
+
+func monitorForWindow(display *gdk.Display, window *gtk.Window) *gdk.Monitor {
+	if display == nil {
+		return nil
+	}
+	if nativeWindow := window.Window(); nativeWindow != nil {
+		if monitor := display.MonitorAtWindow(nativeWindow); monitor != nil {
+			return monitor
+		}
+	}
+	return fallbackMonitor(display)
+}
+
+func fallbackMonitor(display *gdk.Display) *gdk.Monitor {
+	if display == nil {
+		return nil
+	}
+	if monitor := display.PrimaryMonitor(); monitor != nil {
+		return monitor
+	}
+	if display.NMonitors() > 0 {
+		return display.Monitor(0)
+	}
+	return nil
+}
+
+func monitorDimensions(monitor *gdk.Monitor) (height, width, centerInset int) {
+	if monitor != nil {
+		if geometry := monitor.Geometry(); geometry != nil {
+			geometryHeight := geometry.Height()
+			height = geometryHeight
+			width = geometry.Width()
+			if workarea := monitor.Workarea(); workarea != nil && workarea.Height() > 0 && workarea.Height() < geometryHeight {
+				height = workarea.Height()
+			} else {
+				centerInset = 32
+			}
+		}
+	}
+	if height <= 0 {
+		if screen := gdk.ScreenGetDefault(); screen != nil {
+			height = screen.Height()
+			width = screen.Width()
+			centerInset = 32
+		}
+	}
+	if height <= 0 {
+		height = 1080
+		centerInset = 32
+	}
+	if width <= 0 {
+		width = config.Current.Width
+	}
+	return
 }
 
 func centeredLeftMargin(monitorWidth, collapsedWidth int) int {

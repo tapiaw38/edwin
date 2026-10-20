@@ -6,6 +6,13 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-20
+
+### Fixed
+
+- Let the compositor place the launcher on the focused output, avoiding Wayland's unavailable global pointer coordinates and the primary-monitor fallback.
+- Applied estimated horizontal and vertical margins before mapping, then corrected only when the mapped monitor geometry differs; cached the collapsed window height to avoid visible positioning jumps.
+
 ## [0.4.0] - 2026-10-20
 
 ### Added
