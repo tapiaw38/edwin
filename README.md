@@ -224,6 +224,8 @@ web_shortcuts:
 
 `position` accepts `top` (default), `center`, or `bottom`. Each time the hidden launcher opens, it fades in over about 180 ms. `top` slides down from the top edge while fading in; `bottom` slides up from the bottom edge while fading in; `center` fades in without sliding, with the collapsed input's bottom edge fixed just above the monitor's vertical center so results and previews grow downward. Invalid values use `top`. `margin_top` remains accepted for existing config files but no longer affects launcher position.
 
+File previews and Spotify/YouTube player details share a 300px sidebar to the right of search results. The sidebar fades in when shown. Edwin anchors the launcher's left edge at its initial centered position, so opening the sidebar expands the window to the right without shifting the input.
+
 `shortcut_modifier` selects the modifier for numbered result shortcuts: `ctrl+shift` (default), `super`, `ctrl`, `alt`, `alt+shift`, or `super+shift`. The first nine results show a small badge (`C⇧-1` by default, `S-1`, `C-1`, `A-1`, `A⇧-1`, or `S⇧-1`); the selected result shows `↵`. Press the configured modifier with `1`–`9` to select and run that result using its normal confirmation and keep-open behavior. Edwin handles top-row keys by physical key position, including shifted symbols and keypad digits.
 
 ## Key Files to Modify
