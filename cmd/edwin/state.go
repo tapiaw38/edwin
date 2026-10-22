@@ -43,6 +43,9 @@ var (
 var (
 	previewVersion  uint64
 	quickLookActive bool
+
+	shiftHeld           bool
+	shiftUsedAsModifier bool
 	previewPage     int
 	previewScale    int
 )

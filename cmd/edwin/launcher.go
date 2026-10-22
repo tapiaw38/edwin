@@ -365,6 +365,7 @@ func hideLauncher(window *gtk.Window) {
 	} else {
 		searchEntry.SetText("")
 	}
+	resetShiftTap()
 	resultsScroll.Hide()
 	spotifyView.Hide()
 	previewBox.Hide()
@@ -516,8 +517,30 @@ func buildPreviewToolbar() *gtk.Box {
 }
 
 func connectKeyBindings(window *gtk.Window) {
+	window.AddEvents(int(gdk.KeyPressMask | gdk.KeyReleaseMask))
+	window.Connect("key-release-event", func(_ *gtk.Window, event *gdk.Event) bool {
+		keyEvent := event.AsKey()
+		if !isShiftKey(keyEvent.Keyval()) {
+			return false
+		}
+		tapped := shiftHeld && !shiftUsedAsModifier
+		resetShiftTap()
+		if !tapped || !shouldToggleQuickLookOnShift(keyEvent.State()) {
+			return false
+		}
+		toggleQuickLook()
+		return true
+	})
 	window.Connect("key-press-event", func(_ *gtk.Window, event *gdk.Event) bool {
 		keyEvent := event.AsKey()
+		if isShiftKey(keyEvent.Keyval()) {
+			if !shiftHeld {
+				shiftHeld = true
+				shiftUsedAsModifier = !shouldToggleQuickLookOnShift(keyEvent.State())
+			}
+			return false
+		}
+		shiftUsedAsModifier = true
 		if executeShortcut(window, keyEvent.Keyval(), keyEvent.HardwareKeycode(), keyEvent.State()) {
 			return true
 		}
@@ -541,12 +564,6 @@ func connectKeyBindings(window *gtk.Window) {
 			return true
 		case gdk.KEY_Tab:
 			showSelectedFileActions()
-			return true
-		case gdk.KEY_Shift_L, gdk.KEY_Shift_R:
-			if !shouldToggleQuickLookOnShift(keyEvent.State()) {
-				return false
-			}
-			toggleQuickLook()
 			return true
 		case gdk.KEY_Page_Down, gdk.KEY_Right:
 			return quickLook(func() { changePreviewPage(1) })

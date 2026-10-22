@@ -15,6 +15,15 @@ func shouldToggleQuickLookOnShift(state gdk.ModifierType) bool {
 	return state&(gdk.ControlMask|gdk.Mod1Mask|gdk.SuperMask) == 0
 }
 
+func isShiftKey(keyval uint) bool {
+	return keyval == gdk.KEY_Shift_L || keyval == gdk.KEY_Shift_R
+}
+
+func resetShiftTap() {
+	shiftHeld = false
+	shiftUsedAsModifier = false
+}
+
 func shortcutModifier(name string) (gdk.ModifierType, string) {
 	switch name {
 	case "super":

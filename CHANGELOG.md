@@ -6,6 +6,12 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-10-21
+
+### Fixed
+
+- Trigger Quick Look only when Shift is tapped by itself, preventing shifted letters and symbols from opening the preview while typing.
+
 ## [0.4.1] - 2026-10-20
 
 ### Fixed
