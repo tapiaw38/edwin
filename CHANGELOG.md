@@ -6,6 +6,10 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+### Fixed
+
+- Stopped passing an unsupported `-e` flag to `kitty` and `foot` when running shell commands, which made the terminal fail to launch instead of executing the command.
+
 ## [0.4.2] - 2026-10-21
 
 ### Fixed

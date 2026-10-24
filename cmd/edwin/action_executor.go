@@ -22,6 +22,8 @@ import (
 
 var terminalExecArgs = map[string][]string{
 	"gnome-terminal": {"--"},
+	"kitty":          {},
+	"foot":           {},
 }
 
 var terminals = []string{"ghostty", "alacritty", "kitty", "foot", "gnome-terminal"}
@@ -132,11 +134,12 @@ func openTerminal(command string) bool {
 		if _, err := cmdrunner.LookPath(term); err != nil {
 			continue
 		}
-		execFlag := "-e"
-		if flags, ok := terminalExecArgs[term]; ok {
-			execFlag = flags[0]
+		execArgs, ok := terminalExecArgs[term]
+		if !ok {
+			execArgs = []string{"-e"}
 		}
-		return startCommand(term, execFlag, "sh", "-c", command)
+		args := append(append([]string{}, execArgs...), "sh", "-c", command)
+		return startCommand(term, args...)
 	}
 	modules.SetStatus(false, "No terminal found: install one of "+strings.Join(terminals, ", "))
 	return false
