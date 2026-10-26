@@ -7,6 +7,7 @@ import (
 
 	"github.com/diamondburned/gotk4/pkg/glib/v2"
 	"github.com/tapiaw38/edwin/internal/apps"
+	"github.com/tapiaw38/edwin/internal/history"
 	"github.com/tapiaw38/edwin/internal/modules"
 )
 
@@ -37,6 +38,42 @@ func appSearch(query string) []modules.Result {
 		out = append(out, modules.Result{
 			Type:       modules.TypeApp,
 			Title:      app.Name,
+			Icon:       app.Icon,
+			ActionSpec: modules.AppActionArgs(app.Name, app.ExecArgs, app.Icon),
+		})
+	}
+	return out
+}
+
+func showRecentApps() bool {
+	if inSpotifyMode || listBox == nil || searchEntry.Text() != "" || len(currentResults) > 0 {
+		return false
+	}
+	results := recentAppResults()
+	if len(results) == 0 {
+		return false
+	}
+	setResults(results)
+	return true
+}
+
+func recentAppResults() []modules.Result {
+	byName := make(map[string]apps.App, len(allApps))
+	for _, app := range allApps {
+		byName[app.Name] = app
+	}
+
+	names := history.Recent()
+	out := make([]modules.Result, 0, len(names))
+	for _, name := range names {
+		app, ok := byName[name]
+		if !ok {
+			continue
+		}
+		out = append(out, modules.Result{
+			Type:       modules.TypeApp,
+			Title:      app.Name,
+			Desc:       "Recent",
 			Icon:       app.Icon,
 			ActionSpec: modules.AppActionArgs(app.Name, app.ExecArgs, app.Icon),
 		})

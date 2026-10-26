@@ -554,6 +554,9 @@ func connectKeyBindings(window *gtk.Window) {
 			hideLauncher(window)
 			return true
 		case gdk.KEY_Down:
+			if showRecentApps() {
+				return true
+			}
 			selectNext()
 			return true
 		case gdk.KEY_Up:
