@@ -138,11 +138,15 @@ func openTerminal(command string) bool {
 		if !ok {
 			execArgs = []string{"-e"}
 		}
-		args := append(append([]string{}, execArgs...), "sh", "-c", command)
+		args := append(append([]string{}, execArgs...), "sh", "-c", terminalShellCommand(command))
 		return startCommand(term, args...)
 	}
 	modules.SetStatus(false, "No terminal found: install one of "+strings.Join(terminals, ", "))
 	return false
+}
+
+func terminalShellCommand(command string) string {
+	return "export PATH=\"$HOME/.local/bin:$HOME/bin:$PATH\"\n" + command + "\n__edwin_status=$?\nprintf '\\nCommand exited with status %s. Press Enter to close.' \"$__edwin_status\"\nread -r _"
 }
 
 func copyToClipboard(text string) bool {

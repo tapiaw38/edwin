@@ -6,9 +6,14 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-10-26
+
 ### Fixed
 
 - Stopped passing an unsupported `-e` flag to `kitty` and `foot` when running shell commands, which made the terminal fail to launch instead of executing the command.
+- Added user binary directories to terminal command `PATH` so compositor-launched Edwin can find locally installed executables.
+- Kept terminal output visible with the command exit status until Enter is pressed.
+- Restored keyboard focus to confirmation dialogs by opening them as overlay layer-shell surfaces on the launcher's monitor.
 
 ## [0.4.2] - 2026-10-21
 

@@ -46,8 +46,8 @@ var (
 
 	shiftHeld           bool
 	shiftUsedAsModifier bool
-	previewPage     int
-	previewScale    int
+	previewPage         int
+	previewScale        int
 )
 
 var (
