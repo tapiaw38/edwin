@@ -3,6 +3,7 @@ package main
 import (
 	"strconv"
 
+	"github.com/diamondburned/gotk4-layer-shell/pkg/gtklayershell"
 	"github.com/diamondburned/gotk4/pkg/gdk/v3"
 	"github.com/diamondburned/gotk4/pkg/gtk/v3"
 	"github.com/tapiaw38/edwin/internal/config"
@@ -242,6 +243,14 @@ func executePlayerControl() {
 
 func confirmAction(r modules.Result) bool {
 	dialog := gtk.NewMessageDialog(mainWindow, gtk.DialogModal, gtk.MessageWarning, gtk.ButtonsOKCancel)
+	gtklayershell.InitForWindow(&dialog.Window)
+	gtklayershell.SetLayer(&dialog.Window, gtklayershell.LayerShellLayerOverlay)
+	gtklayershell.SetKeyboardMode(&dialog.Window, gtklayershell.LayerShellKeyboardModeExclusive)
+	if mainWindow != nil {
+		if monitor := monitorForWindow(gdk.DisplayGetDefault(), mainWindow); monitor != nil {
+			gtklayershell.SetMonitor(&dialog.Window, monitor)
+		}
+	}
 	dialog.SetMarkup("<b>" + r.Title + "</b>\n" + r.Desc)
 	dialog.ShowAll()
 	response := dialog.Run()

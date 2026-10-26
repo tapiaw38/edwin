@@ -22,6 +22,8 @@ import (
 
 var terminalExecArgs = map[string][]string{
 	"gnome-terminal": {"--"},
+	"kitty":          {},
+	"foot":           {},
 }
 
 var terminals = []string{"ghostty", "alacritty", "kitty", "foot", "gnome-terminal"}
@@ -132,14 +134,19 @@ func openTerminal(command string) bool {
 		if _, err := cmdrunner.LookPath(term); err != nil {
 			continue
 		}
-		execFlag := "-e"
-		if flags, ok := terminalExecArgs[term]; ok {
-			execFlag = flags[0]
+		execArgs, ok := terminalExecArgs[term]
+		if !ok {
+			execArgs = []string{"-e"}
 		}
-		return startCommand(term, execFlag, "sh", "-c", command)
+		args := append(append([]string{}, execArgs...), "sh", "-c", terminalShellCommand(command))
+		return startCommand(term, args...)
 	}
 	modules.SetStatus(false, "No terminal found: install one of "+strings.Join(terminals, ", "))
 	return false
+}
+
+func terminalShellCommand(command string) string {
+	return "export PATH=\"$HOME/.local/bin:$HOME/bin:$PATH\"\n" + command + "\n__edwin_status=$?\nprintf '\\nCommand exited with status %s. Press Enter to close.' \"$__edwin_status\"\nread -r _"
 }
 
 func copyToClipboard(text string) bool {
