@@ -6,6 +6,12 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-26
+
+### Added
+
+- Show up to 12 recently used apps when Down is pressed with an empty search input, using most-used apps as a fallback for older history entries.
+
 ## [0.4.3] - 2026-10-26
 
 ### Fixed
