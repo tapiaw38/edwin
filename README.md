@@ -61,6 +61,16 @@ edwin
 
 For a manual source build, run `./edwin` from the repository root.
 
+### Autostart
+
+The first launch starts the Edwin process, which costs a few hundred milliseconds; every later launch only activates the running instance over D-Bus and takes about 20 ms. Start Edwin at login to pay that cost before the first hotkey press:
+
+```bash
+edwin --background
+```
+
+`--background` keeps the launcher window hidden at startup, leaving only the tray icon. Add it to the compositor's autostart script after the status bar is started, so the tray icon finds a StatusNotifier host.
+
 ## System Tray
 
 Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-click the tray icon to show or hide the launcher; right-click and choose **Quit** to exit. Closing the launcher window hides it while Edwin keeps running in the tray. `Esc` leaves file-action mode first, then hides the launcher. Launching Edwin again activates the existing instance over D-Bus and brings its window forward.

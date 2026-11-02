@@ -78,7 +78,7 @@ func runLauncher() {
 
 	allApps = apps.Load()
 	initSearch()
-	go preloadIcons()
+	glib.IdleAdd(preloadIcons)
 
 	window := newLauncherWindow()
 	mainWindow = window
@@ -116,7 +116,9 @@ func runLauncher() {
 	window.ShowAll()
 	hideLauncher(window)
 	entry.GrabFocus()
-	animateShow(window)
+	if !startHidden() {
+		animateShow(window)
+	}
 	tray := systray.New()
 	menu := systray.NewMenu()
 	menu.Add("Quit", func() {
@@ -143,6 +145,15 @@ func runLauncher() {
 
 	gtk.Main()
 	tray.Remove()
+}
+
+func startHidden() bool {
+	for _, arg := range os.Args[1:] {
+		if arg == "--background" {
+			return true
+		}
+	}
+	return false
 }
 
 func newLauncherWindow() *gtk.Window {

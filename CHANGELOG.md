@@ -6,6 +6,20 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-02
+
+### Added
+
+- `--background` flag to start Edwin with the launcher window hidden, for autostarting it at login so the first hotkey press activates an already running instance.
+
+### Fixed
+
+- Preload icons on the GTK main loop instead of a goroutine, removing the `GTK_IS_LIST_BOX_ROW` assertion failures logged at startup.
+
+### Changed
+
+- Build release binaries with `-ldflags="-s -w"`, reducing the published `edwin` asset from 72 MB to 47 MB.
+
 ## [0.5.0] - 2026-10-26
 
 ### Added

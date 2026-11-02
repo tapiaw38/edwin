@@ -43,7 +43,7 @@ jobs:
         run: go vet ./...
 
       - name: Build
-        run: go build -mod=mod -buildvcs=false -o edwin ./cmd/edwin/
+        run: go build -mod=mod -buildvcs=false -ldflags="-s -w" -o edwin ./cmd/edwin/
 
       - name: Run tests
         run: go test -mod=mod ./...
