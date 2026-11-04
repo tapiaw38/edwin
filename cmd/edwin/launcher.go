@@ -128,23 +128,28 @@ func runLauncher() {
 		glib.IdleAdd(func() {
 			if window.IsVisible() {
 				hideLauncher(window)
-			} else {
-				animateShow(window)
-				entry.GrabFocus()
+				return
 			}
+			go reloadAppsAndShow(window, entry)
 		})
 	}).SetMenu(menu).Show()
 	go func() {
 		for range activationRequests {
-			glib.IdleAdd(func() {
-				animateShow(window)
-				entry.GrabFocus()
-			})
+			reloadAppsAndShow(window, entry)
 		}
 	}()
 
 	gtk.Main()
 	tray.Remove()
+}
+
+func reloadAppsAndShow(window *gtk.Window, entry *gtk.Entry) {
+	fresh := apps.Load()
+	glib.IdleAdd(func() {
+		allApps = fresh
+		animateShow(window)
+		entry.GrabFocus()
+	})
 }
 
 func startHidden() bool {

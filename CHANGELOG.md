@@ -6,6 +6,12 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-03
+
+### Fixed
+
+- Reload the installed application list every time the launcher is shown, so apps installed or removed while Edwin runs in the background appear without restarting it. Both the hotkey and the tray icon refresh the list.
+
 ## [0.6.0] - 2026-11-02
 
 ### Added
