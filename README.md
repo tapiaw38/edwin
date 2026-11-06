@@ -339,6 +339,10 @@ playerctl metadata
 playerctl status
 ```
 
+## Contributing
+
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks, and the pull request flow, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before taking part. Report security problems privately through [SECURITY.md](SECURITY.md), never in a public issue.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
