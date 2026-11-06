@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/tapiaw38/edwin/discussions
+    about: Ask for help, share a setup, or talk an idea through before opening an issue.
+  - name: Security vulnerability
+    url: https://github.com/tapiaw38/edwin/security/advisories/new
+    about: Report a security problem privately. Do not open a public issue.

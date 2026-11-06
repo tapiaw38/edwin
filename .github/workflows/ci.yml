@@ -35,6 +35,14 @@ jobs:
           restore-keys: |
             archlinux-go-
 
+      - name: Check formatting
+        run: |
+          unformatted=$(find . -name '*.go' -not -path './.cache/*' -not -path './vendor/*' -exec gofmt -l {} +)
+          if [ -n "$unformatted" ]; then
+            printf 'These files are not gofmt-formatted:\n%s\n' "$unformatted"
+            exit 1
+          fi
+
       - name: Run go vet
         run: go vet ./...
 

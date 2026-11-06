@@ -1,0 +1,84 @@
+name: Bug report
+description: Something in Edwin does not work as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Edwin behaves differently across Wayland compositors, so the environment fields matter as much as the steps.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+      placeholder: |
+        I typed `f report` in the launcher.
+        Expected: a list of matching files.
+        Actual: the window closed with no results.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Edwin version
+      description: The release tag you installed, or the commit SHA if you built from source.
+      placeholder: v0.8.0
+    validations:
+      required: true
+
+  - type: input
+    id: distro
+    attributes:
+      label: Distribution
+      placeholder: Arch Linux
+    validations:
+      required: true
+
+  - type: dropdown
+    id: compositor
+    attributes:
+      label: Compositor
+      options:
+        - MangoWM
+        - Hyprland
+        - sway
+        - river
+        - Other (say which below)
+    validations:
+      required: true
+
+  - type: input
+    id: gtk
+    attributes:
+      label: GTK3 version
+      description: "Output of: pkg-config --modversion gtk+-3.0"
+      placeholder: "3.24.49"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output
+      description: "Run `edwin 2>&1` from a terminal and paste what it prints. This is rendered as a code block, no backticks needed."
+      render: shell
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Config
+      description: The relevant part of ~/.config/edwin/config.yaml, with any secrets removed.
+      render: yaml

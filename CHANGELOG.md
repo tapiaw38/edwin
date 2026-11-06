@@ -6,6 +6,13 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- Contributor documentation: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, and `.github/SUPPORT.md`.
+- Pull request template and issue forms for bug reports, feature requests, and documentation.
+- Dependabot updates for Go modules and GitHub Actions.
+- CI now fails on unformatted Go code.
+
 ## [0.8.0] - 2026-11-06
 
 ### Added
