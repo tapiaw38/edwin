@@ -187,7 +187,7 @@ File ops: `Tab` on a file opens actions. `Add to Buffer`, `Copy Path`, `Rename..
 
 Location: `~/.config/edwin/config.yaml`
 
-Color themes: `edwin` (default), `dark`, `midnight`, `light`, and `classic`.
+Color themes: `edwin` (default), `paper`, `dark`, `midnight`, `light`, and `classic`.
 
 The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/edwin/assets/edwin-icon.png`). Preset color values:
 
@@ -197,17 +197,20 @@ The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/e
 | `midnight` | `8, 8, 12` / `0.97` | `rgba(255, 255, 255, 0.07)` | `40, 55, 95` | `white` | `40, 55, 95` | `rgba(255, 255, 255, 0.5)` |
 | `light` | `245, 245, 248` / `0.97` | `rgba(0, 0, 0, 0.06)` | `90, 140, 255` | `#1c1c1e` | `90, 140, 255` | `rgba(0, 0, 0, 0.55)` |
 | `classic` | `238, 232, 213` / `0.97` | `rgba(0, 0, 0, 0.05)` | `38, 139, 210` | `#073642` | `38, 139, 210` | `rgba(7, 54, 66, 0.6)` |
-| `edwin` | `24, 26, 34` / `0.97` | `rgba(208, 193, 180, 0.2)` | `245, 215, 140` | `#fdf2d6` | `208, 193, 180` | `rgba(253, 242, 214, 0.62)` |
+| `edwin` | `28, 25, 22` / `0.97` | `rgba(208, 193, 180, 0.2)` | `245, 215, 140` | `#fdf2d6` | `208, 193, 180` | `rgba(253, 242, 214, 0.62)` |
+| `paper` | `245, 244, 239` / `0.98` | `rgba(69, 57, 45, 0.08)` | `126, 76, 40` | `#24211d` | `190, 137, 87` | `rgba(69, 57, 45, 0.68)` |
 
-`theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. `selection_color` is rendered with 0.3 alpha. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
+`theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. `selection_color` is rendered with 0.42 alpha. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
 
 `border_radius` rounds the launcher window's corners. `border_width` draws a border around the window and defaults to `0`, which leaves it borderless; `border_color` sets that border's color and falls back to `focus_border_color` when unset. `input_border_width` defaults to `1`; `input_border_color` defaults to transparent, and the focused input uses `focus_border_color`. `input_border_radius` and `row_border_radius` default to `border_radius` and can be set independently, including to `0`. Colors accept an `R, G, B` triplet, a `#rrggbb` value, or a CSS `rgb()`/`rgba()` function.
+
+`font_family` controls launcher typography. Default: `"Inter", "Noto Sans", sans-serif`.
 
 ```yaml
 width: 600
 max_results: 6
 theme: edwin
-background_color: "24, 26, 34"
+background_color: "28, 25, 22"
 background_alpha: 0.97
 border_radius: 12
 border_width: 0
@@ -217,6 +220,7 @@ input_border_color: "208, 193, 180"
 input_border_radius: 12
 row_border_radius: 12
 font_size: 18
+font_family: '"Inter", "Noto Sans", sans-serif'
 text_color: "#fdf2d6"
 selection_color: "208, 193, 180"
 entry_background: "rgba(208, 193, 180, 0.2)"

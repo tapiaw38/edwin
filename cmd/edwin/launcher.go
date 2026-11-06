@@ -410,10 +410,12 @@ func buildSearchEntry() *gtk.Entry {
 	searchEntry = entry
 	entry.SetPlaceholderText("Search apps, ;snippet, define word, > shell...")
 	entry.SetName("edwin-entry")
+	updateQueryContext("")
 
 	entry.Connect("changed", func() {
 		query := entry.Text()
 		inActionMode = false
+		updateQueryContext(query)
 
 		if debounceTimer != nil {
 			debounceTimer.Stop()

@@ -23,6 +23,7 @@ type Config struct {
 	InputBorderRadius *int    `yaml:"input_border_radius,omitempty"`
 	RowBorderRadius   *int    `yaml:"row_border_radius,omitempty"`
 	FontSize          int     `yaml:"font_size"`
+	FontFamily        string  `yaml:"font_family"`
 	TextColor         string  `yaml:"text_color"`
 	SelectionColor    string  `yaml:"selection_color"`
 	FocusBorderColor  string  `yaml:"focus_border_color"`
@@ -53,12 +54,13 @@ var defaultConfig = Config{
 	Width:            600,
 	MaxResults:       6,
 	Theme:            "edwin",
-	BackgroundColor:  "24, 26, 34",
+	BackgroundColor:  "28, 25, 22",
 	BackgroundAlpha:  0.97,
 	BorderRadius:     12,
 	BorderWidth:      0,
 	InputBorderWidth: 1,
 	FontSize:         18,
+	FontFamily:       `"Inter", "Noto Sans", sans-serif`,
 	TextColor:        "#fdf2d6",
 	SelectionColor:   "208, 193, 180",
 	FocusBorderColor: "245, 215, 140",
@@ -284,15 +286,18 @@ func GetCSS() string {
 		@define-color edwin-desc-color %s;
 		@define-color edwin-border %s;
 		@define-color edwin-input-border %s;
+		@define-color edwin-query-icon rgba(%s, 0.72);
 
 		window {
+			font-family: %s;
 			background: @edwin-bg;
 			border-radius: %dpx;
 			border: %dpx solid @edwin-border;
 		}
 		#edwin-entry {
 			font-size: %dpx;
-			padding: %dpx;
+			font-weight: 500;
+			padding: %dpx %dpx;
 			background: @edwin-entry-bg;
 			border: %dpx solid @edwin-input-border;
 			border-radius: %dpx;
@@ -300,6 +305,11 @@ func GetCSS() string {
 		}
 		#edwin-entry:focus {
 			border: %dpx solid @edwin-focus-border;
+			box-shadow: 0 0 0 2px alpha(@edwin-focus-border, 0.18);
+		}
+		#edwin-entry image {
+			color: @edwin-query-icon;
+			opacity: 0.72;
 		}
 		#edwin-results {
 			background: transparent;
@@ -315,16 +325,22 @@ func GetCSS() string {
 		#edwin-row:hover,
 		#edwin-row:focus,
 		#edwin-row:active {
-			background: transparent;
+			background: alpha(@edwin-focus-border, 0.08);
 			outline: none;
 			box-shadow: none;
 		}
 		#edwin-row:selected,
 		#edwin-row:selected:hover,
 		#edwin-row:selected:focus {
-			background: @edwin-selection;
+			background: alpha(@edwin-selection, 0.42);
 			outline: none;
-			box-shadow: none;
+		}
+		#edwin-row:selected #edwin-title {
+			font-weight: 700;
+		}
+		#edwin-row:selected #edwin-desc,
+		#edwin-row:selected #edwin-shortcut-badge {
+			color: @edwin-text;
 		}
 		#edwin-title {
 			color: @edwin-text;
@@ -336,11 +352,21 @@ func GetCSS() string {
 		}
 		#edwin-shortcut-badge {
 			color: @edwin-desc-color;
-			font-size: 11px;
+			font-size: 10px;
+			font-family: monospace;
+			font-weight: 600;
+			background: alpha(@edwin-focus-border, 0.12);
+			border: 0;
+			border-radius: 999px;
+			min-height: 20px;
+			padding: 0 10px;
+		}
+		#edwin-row:selected #edwin-shortcut-badge {
+			background: alpha(@edwin-focus-border, 0.2);
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,
 		c.FocusBorderColor, c.EntryBackground, c.DescColor, borderColorValue(c),
-		inputBorderColorValue(c), c.BorderRadius, c.BorderWidth, c.FontSize,
-		SpacingLarge, c.InputBorderWidth, radiusOrInherit(c.InputBorderRadius, c.BorderRadius),
+		inputBorderColorValue(c), c.BackgroundColor, c.FontFamily, c.BorderRadius, c.BorderWidth, c.FontSize,
+		SpacingLarge, SpacingMedium, c.InputBorderWidth, radiusOrInherit(c.InputBorderRadius, c.BorderRadius),
 		inputFocusBorderWidth(c), radiusOrInherit(c.RowBorderRadius, c.BorderRadius), SpacingTiny, SpacingMedium, FontSizeTitle, FontSizeSmall)
 }

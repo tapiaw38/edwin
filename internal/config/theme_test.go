@@ -18,6 +18,9 @@ func TestEdwinThemeIsDefault(t *testing.T) {
 	if got := ColorPresets["edwin"].FocusBorderColor; got != "245, 215, 140" {
 		t.Fatalf("edwin focus border = %q, want 245, 215, 140", got)
 	}
+	if defaultConfig.FontFamily != `"Inter", "Noto Sans", sans-serif` {
+		t.Fatalf("default font family = %q", defaultConfig.FontFamily)
+	}
 }
 
 func TestGetCSSUsesFocusBorderColor(t *testing.T) {

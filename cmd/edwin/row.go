@@ -25,11 +25,11 @@ func createResultRow(r modules.Result, index int) *gtk.ListBoxRow {
 	row := gtk.NewListBoxRow()
 	row.SetName("edwin-row")
 
-	hbox := gtk.NewBox(gtk.OrientationHorizontal, 8)
-	hbox.SetMarginStart(8)
-	hbox.SetMarginEnd(8)
-	hbox.SetMarginTop(8)
-	hbox.SetMarginBottom(8)
+	hbox := gtk.NewBox(gtk.OrientationHorizontal, config.SpacingMedium)
+	hbox.SetMarginStart(config.SpacingMedium)
+	hbox.SetMarginEnd(config.SpacingMedium)
+	hbox.SetMarginTop(config.SpacingSmall)
+	hbox.SetMarginBottom(config.SpacingSmall)
 
 	if config.Current.ShowIcons {
 		hbox.PackStart(resultIcon(r), false, false, 0)
@@ -58,7 +58,8 @@ func createResultRow(r modules.Result, index int) *gtk.ListBoxRow {
 		badge := gtk.NewLabel(shortcutBadgeText(config.Current.ShortcutModifier, index))
 		badge.SetName("edwin-shortcut-badge")
 		badge.SetXAlign(1)
-		badge.SetWidthChars(4)
+		badge.SetVAlign(gtk.AlignCenter)
+		badge.SetWidthChars(5)
 		hbox.PackEnd(badge, false, false, 0)
 		if shortcutBadges == nil {
 			resetShortcutBadges()
@@ -82,9 +83,10 @@ func updateShortcutBadges(selected *gtk.ListBoxRow) {
 	for index, badge := range shortcutBadges {
 		if index == selectedIndex {
 			badge.SetText("↵")
-		} else {
-			badge.SetText(shortcutBadgeText(config.Current.ShortcutModifier, index))
+			badge.Show()
+			continue
 		}
+		badge.SetText(shortcutBadgeText(config.Current.ShortcutModifier, index))
 	}
 }
 

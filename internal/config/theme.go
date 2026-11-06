@@ -67,13 +67,22 @@ var ColorPresets = map[string]ColorPreset{
 		DescColor:        "rgba(7, 54, 66, 0.6)",
 	},
 	"edwin": {
-		BackgroundColor:  "24, 26, 34",
+		BackgroundColor:  "28, 25, 22",
 		BackgroundAlpha:  0.97,
 		TextColor:        "#fdf2d6",
 		SelectionColor:   "208, 193, 180",
 		FocusBorderColor: "245, 215, 140",
 		EntryBackground:  "rgba(208, 193, 180, 0.2)",
 		DescColor:        "rgba(253, 242, 214, 0.62)",
+	},
+	"paper": {
+		BackgroundColor:  "245, 244, 239",
+		BackgroundAlpha:  0.98,
+		TextColor:        "#24211d",
+		SelectionColor:   "190, 137, 87",
+		FocusBorderColor: "126, 76, 40",
+		EntryBackground:  "rgba(69, 57, 45, 0.08)",
+		DescColor:        "rgba(69, 57, 45, 0.68)",
 	},
 }
 
