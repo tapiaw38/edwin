@@ -17,7 +17,7 @@ jobs:
       - name: Install system dependencies
         run: pacman -Syu --noconfirm --needed go git base-devel gcc pkgconf gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell gobject-introspection
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build release binary
         run: go build -mod=mod -buildvcs=false -ldflags="-s -w" -o edwin ./cmd/edwin/

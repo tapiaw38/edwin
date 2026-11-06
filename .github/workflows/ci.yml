@@ -24,7 +24,7 @@ jobs:
       - name: Install system dependencies
         run: pacman -Syu --noconfirm --needed go git base-devel gcc pkgconf gtk3 gtk-layer-shell playerctl yt-dlp aspell hunspell gobject-introspection
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/cache@v6
         with:
