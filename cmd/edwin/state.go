@@ -12,6 +12,7 @@ import (
 )
 
 var (
+	leftColumn     *gtk.Box
 	listBox        *gtk.ListBox
 	resultsScroll  *gtk.ScrolledWindow
 	searchEntry    *gtk.Entry

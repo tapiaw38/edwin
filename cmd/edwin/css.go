@@ -8,9 +8,15 @@ import (
 	"github.com/tapiaw38/edwin/internal/config"
 )
 
+var cssProvider *gtk.CSSProvider
+
 func loadCSS() {
-	css := gtk.NewCSSProvider()
-	css.LoadFromData(config.GetCSS() + fmt.Sprintf(`
+	if cssProvider == nil {
+		cssProvider = gtk.NewCSSProvider()
+		screen := gdk.ScreenGetDefault()
+		gtk.StyleContextAddProviderForScreen(screen, cssProvider, uint(gtk.STYLE_PROVIDER_PRIORITY_APPLICATION))
+	}
+	cssProvider.LoadFromData(config.GetCSS() + fmt.Sprintf(`
 		#edwin-preview {
 			background: @edwin-black-30;
 			padding: %[2]dpx;
@@ -82,6 +88,4 @@ func loadCSS() {
 		config.FontSizeIcon, config.RadiusMedium, config.SpacingLarge,
 		config.FontSizeLarge, config.FontSizeMedium, config.SpotifyControlSize,
 		config.FontSizeBody))
-	screen := gdk.ScreenGetDefault()
-	gtk.StyleContextAddProviderForScreen(screen, css, uint(gtk.STYLE_PROVIDER_PRIORITY_APPLICATION))
 }

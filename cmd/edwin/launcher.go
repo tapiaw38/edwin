@@ -102,7 +102,7 @@ func runLauncher() {
 		return true
 	})
 
-	leftColumn := gtk.NewBox(gtk.OrientationVertical, mainBoxSpacing)
+	leftColumn = gtk.NewBox(gtk.OrientationVertical, mainBoxSpacing)
 	leftColumn.SetSizeRequest(config.Current.Width-2*mainBoxMargin, -1)
 	leftColumn.PackStart(entry, false, false, 0)
 	leftColumn.PackStart(resultsScroll, true, true, 0)
@@ -121,6 +121,9 @@ func runLauncher() {
 	}
 	tray := systray.New()
 	menu := systray.NewMenu()
+	menu.Add("Reload", func() {
+		glib.IdleAdd(func() { reloadConfig(window) })
+	})
 	menu.Add("Quit", func() {
 		glib.IdleAdd(func() { gtk.MainQuit() })
 	})
@@ -141,6 +144,20 @@ func runLauncher() {
 
 	gtk.Main()
 	tray.Remove()
+}
+
+func reloadConfig(window *gtk.Window) {
+	if err := config.Load(); err != nil {
+		os.Stderr.WriteString("Edwin config invalid: " + err.Error() + "\n")
+		return
+	}
+	loadCSS()
+	contentWidth := config.Current.Width - 2*mainBoxMargin
+	window.SetSizeRequest(config.Current.Width, -1)
+	leftColumn.SetSizeRequest(contentWidth, -1)
+	resultsScroll.SetSizeRequest(contentWidth, resultsHeight)
+	spotifyScroll.SetSizeRequest(contentWidth, resultsHeight)
+	launcherPosition.collapsedHeight = 0
 }
 
 func reloadAppsAndShow(window *gtk.Window, entry *gtk.Entry) {

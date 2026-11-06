@@ -33,3 +33,24 @@ func TestGetCSSUsesFocusBorderColor(t *testing.T) {
 		t.Fatal("CSS does not apply the focus border to the input")
 	}
 }
+
+func TestGetCSSUsesConfiguredBorder(t *testing.T) {
+	previous := Current
+	defer func() { Current = previous }()
+
+	Current = defaultConfig
+	Current.BorderWidth = 3
+	Current.BorderColor = "#ff0000"
+	css := GetCSS()
+	if !strings.Contains(css, "border: 3px solid @edwin-border;") {
+		t.Fatal("CSS does not apply the configured border width")
+	}
+	if !strings.Contains(css, "@define-color edwin-border #ff0000;") {
+		t.Fatal("CSS does not define the configured border color")
+	}
+
+	Current.BorderColor = ""
+	if css := GetCSS(); !strings.Contains(css, "@define-color edwin-border rgba(245, 215, 140, 1);") {
+		t.Fatal("CSS does not fall back to the focus border color")
+	}
+}

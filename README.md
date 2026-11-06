@@ -73,7 +73,7 @@ edwin --background
 
 ## System Tray
 
-Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-click the tray icon to show or hide the launcher; right-click and choose **Quit** to exit. Closing the launcher window hides it while Edwin keeps running in the tray. `Esc` leaves file-action mode first, then hides the launcher. Launching Edwin again activates the existing instance over D-Bus and brings its window forward.
+Edwin registers a StatusNotifierItem on the session D-Bus while running. Left-click the tray icon to show or hide the launcher; right-click for a menu with **Reload** and **Quit**. Edwin reads `config.yaml` once at startup, so a long-running instance keeps serving the config it started with: choose **Reload** after editing the file to re-read it and re-apply the colors, borders, fonts, and width without restarting. An invalid file is reported on stderr and leaves the running config untouched. Choose **Quit** to exit. Closing the launcher window hides it while Edwin keeps running in the tray. `Esc` leaves file-action mode first, then hides the launcher. Launching Edwin again activates the existing instance over D-Bus and brings its window forward.
 
 ## Setup Hotkey
 
@@ -201,6 +201,8 @@ The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/e
 
 `theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. `selection_color` is rendered with 0.3 alpha. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
 
+`border_radius` rounds the launcher window's corners. `border_width` draws a border around the window and defaults to `0`, which leaves it borderless; `border_color` sets that border's color and falls back to `focus_border_color` when unset. Colors accept an `R, G, B` triplet, a `#rrggbb` value, or a CSS `rgb()`/`rgba()` function.
+
 ```yaml
 width: 600
 max_results: 6
@@ -208,6 +210,8 @@ theme: edwin
 background_color: "24, 26, 34"
 background_alpha: 0.97
 border_radius: 12
+border_width: 0
+border_color: "245, 215, 140"
 font_size: 18
 text_color: "#fdf2d6"
 selection_color: "208, 193, 180"

@@ -6,6 +6,13 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-06
+
+### Added
+
+- `border_width` and `border_color` config fields for a border around the launcher window. `border_width` defaults to `0`, and `border_color` falls back to `focus_border_color`. Colors accept an `R, G, B` triplet, a `#rrggbb` value, or a CSS `rgb()`/`rgba()` function.
+- **Reload** item in the tray menu, which re-reads `config.yaml` and re-applies styling and window width without restarting Edwin. An invalid file is reported on stderr and leaves the running config untouched.
+
 ## [0.6.1] - 2026-11-03
 
 ### Fixed

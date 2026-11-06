@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -15,6 +16,8 @@ type Config struct {
 	BackgroundColor  string  `yaml:"background_color"`
 	BackgroundAlpha  float64 `yaml:"background_alpha"`
 	BorderRadius     int     `yaml:"border_radius"`
+	BorderWidth      int     `yaml:"border_width"`
+	BorderColor      string  `yaml:"border_color"`
 	FontSize         int     `yaml:"font_size"`
 	TextColor        string  `yaml:"text_color"`
 	SelectionColor   string  `yaml:"selection_color"`
@@ -49,6 +52,7 @@ var defaultConfig = Config{
 	BackgroundColor:  "24, 26, 34",
 	BackgroundAlpha:  0.97,
 	BorderRadius:     12,
+	BorderWidth:      0,
 	FontSize:         18,
 	TextColor:        "#fdf2d6",
 	SelectionColor:   "208, 193, 180",
@@ -229,6 +233,20 @@ func containsEdwinBind(line string) bool {
 	return false
 }
 
+func colorValue(value string) string {
+	if strings.HasPrefix(value, "#") || strings.HasPrefix(value, "rgb") {
+		return value
+	}
+	return "rgba(" + value + ", 1)"
+}
+
+func borderColorValue(c Config) string {
+	if c.BorderColor != "" {
+		return colorValue(c.BorderColor)
+	}
+	return colorValue(c.FocusBorderColor)
+}
+
 func GetCSS() string {
 	c := Current
 	return StaticThemeCSS + fmt.Sprintf(`
@@ -238,10 +256,12 @@ func GetCSS() string {
 		@define-color edwin-focus-border rgba(%s, 1);
 		@define-color edwin-entry-bg %s;
 		@define-color edwin-desc-color %s;
+		@define-color edwin-border %s;
 
 		window {
 			background: @edwin-bg;
 			border-radius: %dpx;
+			border: %dpx solid @edwin-border;
 		}
 		#edwin-entry {
 			font-size: %dpx;
@@ -292,7 +312,7 @@ func GetCSS() string {
 			font-size: 11px;
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,
-		c.FocusBorderColor, c.EntryBackground, c.DescColor,
-		c.BorderRadius, c.FontSize, SpacingLarge, RadiusMedium,
+		c.FocusBorderColor, c.EntryBackground, c.DescColor, borderColorValue(c),
+		c.BorderRadius, c.BorderWidth, c.FontSize, SpacingLarge, RadiusMedium,
 		RadiusSmall, SpacingTiny, SpacingMedium, FontSizeTitle, FontSizeSmall)
 }
