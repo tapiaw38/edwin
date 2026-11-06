@@ -201,7 +201,7 @@ The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/e
 
 `theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. `selection_color` is rendered with 0.3 alpha. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
 
-`border_radius` rounds the launcher window's corners. `border_width` draws a border around the window and defaults to `0`, which leaves it borderless; `border_color` sets that border's color and falls back to `focus_border_color` when unset. Colors accept an `R, G, B` triplet, a `#rrggbb` value, or a CSS `rgb()`/`rgba()` function.
+`border_radius` rounds the launcher window's corners. `border_width` draws a border around the window and defaults to `0`, which leaves it borderless; `border_color` sets that border's color and falls back to `focus_border_color` when unset. `input_border_width` defaults to `1`; `input_border_color` defaults to transparent, and the focused input uses `focus_border_color`. `input_border_radius` and `row_border_radius` default to `border_radius` and can be set independently, including to `0`. Colors accept an `R, G, B` triplet, a `#rrggbb` value, or a CSS `rgb()`/`rgba()` function.
 
 ```yaml
 width: 600
@@ -212,6 +212,10 @@ background_alpha: 0.97
 border_radius: 12
 border_width: 0
 border_color: "245, 215, 140"
+input_border_width: 1
+input_border_color: "208, 193, 180"
+input_border_radius: 12
+row_border_radius: 12
 font_size: 18
 text_color: "#fdf2d6"
 selection_color: "208, 193, 180"
