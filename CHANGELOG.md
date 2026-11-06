@@ -6,6 +6,17 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-06
+
+### Added
+
+- Contextual search icons that identify launcher modes including file navigation, music, weather, web, terminal, and system commands.
+- `paper` color theme and configurable `font_family` typography setting.
+
+### Changed
+
+- Refined the Edwin theme to a warm charcoal background and redesigned result selection, keyboard shortcut badges, and search focus styling.
+
 ## [0.7.0] - 2026-11-06
 
 ### Added
