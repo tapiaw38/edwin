@@ -10,20 +10,24 @@ import (
 )
 
 type Config struct {
-	Width            int     `yaml:"width"`
-	MaxResults       int     `yaml:"max_results"`
-	Theme            string  `yaml:"theme"`
-	BackgroundColor  string  `yaml:"background_color"`
-	BackgroundAlpha  float64 `yaml:"background_alpha"`
-	BorderRadius     int     `yaml:"border_radius"`
-	BorderWidth      int     `yaml:"border_width"`
-	BorderColor      string  `yaml:"border_color"`
-	FontSize         int     `yaml:"font_size"`
-	TextColor        string  `yaml:"text_color"`
-	SelectionColor   string  `yaml:"selection_color"`
-	FocusBorderColor string  `yaml:"focus_border_color"`
-	EntryBackground  string  `yaml:"entry_background"`
-	DescColor        string  `yaml:"desc_color"`
+	Width             int     `yaml:"width"`
+	MaxResults        int     `yaml:"max_results"`
+	Theme             string  `yaml:"theme"`
+	BackgroundColor   string  `yaml:"background_color"`
+	BackgroundAlpha   float64 `yaml:"background_alpha"`
+	BorderRadius      int     `yaml:"border_radius"`
+	BorderWidth       int     `yaml:"border_width"`
+	BorderColor       string  `yaml:"border_color"`
+	InputBorderWidth  int     `yaml:"input_border_width"`
+	InputBorderColor  string  `yaml:"input_border_color"`
+	InputBorderRadius *int    `yaml:"input_border_radius,omitempty"`
+	RowBorderRadius   *int    `yaml:"row_border_radius,omitempty"`
+	FontSize          int     `yaml:"font_size"`
+	TextColor         string  `yaml:"text_color"`
+	SelectionColor    string  `yaml:"selection_color"`
+	FocusBorderColor  string  `yaml:"focus_border_color"`
+	EntryBackground   string  `yaml:"entry_background"`
+	DescColor         string  `yaml:"desc_color"`
 
 	WebShortcuts map[string]WebShortcut `yaml:"web_shortcuts"`
 
@@ -53,6 +57,7 @@ var defaultConfig = Config{
 	BackgroundAlpha:  0.97,
 	BorderRadius:     12,
 	BorderWidth:      0,
+	InputBorderWidth: 1,
 	FontSize:         18,
 	TextColor:        "#fdf2d6",
 	SelectionColor:   "208, 193, 180",
@@ -234,7 +239,7 @@ func containsEdwinBind(line string) bool {
 }
 
 func colorValue(value string) string {
-	if strings.HasPrefix(value, "#") || strings.HasPrefix(value, "rgb") {
+	if !strings.Contains(value, ",") || value[0] < '0' || value[0] > '9' {
 		return value
 	}
 	return "rgba(" + value + ", 1)"
@@ -247,6 +252,27 @@ func borderColorValue(c Config) string {
 	return colorValue(c.FocusBorderColor)
 }
 
+func radiusOrInherit(value *int, inherited int) int {
+	if value == nil {
+		return inherited
+	}
+	return *value
+}
+
+func inputBorderColorValue(c Config) string {
+	if c.InputBorderColor == "" {
+		return "transparent"
+	}
+	return colorValue(c.InputBorderColor)
+}
+
+func inputFocusBorderWidth(c Config) int {
+	if c.InputBorderWidth < 1 {
+		return 1
+	}
+	return c.InputBorderWidth
+}
+
 func GetCSS() string {
 	c := Current
 	return StaticThemeCSS + fmt.Sprintf(`
@@ -257,6 +283,7 @@ func GetCSS() string {
 		@define-color edwin-entry-bg %s;
 		@define-color edwin-desc-color %s;
 		@define-color edwin-border %s;
+		@define-color edwin-input-border %s;
 
 		window {
 			background: @edwin-bg;
@@ -267,12 +294,12 @@ func GetCSS() string {
 			font-size: %dpx;
 			padding: %dpx;
 			background: @edwin-entry-bg;
-			border: 1px solid transparent;
+			border: %dpx solid @edwin-input-border;
 			border-radius: %dpx;
 			color: @edwin-text;
 		}
 		#edwin-entry:focus {
-			border: 1px solid @edwin-focus-border;
+			border: %dpx solid @edwin-focus-border;
 		}
 		#edwin-results {
 			background: transparent;
@@ -313,6 +340,7 @@ func GetCSS() string {
 		}
 	`, c.BackgroundColor, c.BackgroundAlpha, c.TextColor, c.SelectionColor,
 		c.FocusBorderColor, c.EntryBackground, c.DescColor, borderColorValue(c),
-		c.BorderRadius, c.BorderWidth, c.FontSize, SpacingLarge, RadiusMedium,
-		RadiusSmall, SpacingTiny, SpacingMedium, FontSizeTitle, FontSizeSmall)
+		inputBorderColorValue(c), c.BorderRadius, c.BorderWidth, c.FontSize,
+		SpacingLarge, c.InputBorderWidth, radiusOrInherit(c.InputBorderRadius, c.BorderRadius),
+		inputFocusBorderWidth(c), radiusOrInherit(c.RowBorderRadius, c.BorderRadius), SpacingTiny, SpacingMedium, FontSizeTitle, FontSizeSmall)
 }
