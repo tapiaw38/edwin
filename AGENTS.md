@@ -29,7 +29,7 @@ Pushing a `v*` tag triggers `.github/workflows/release.yml`, which builds and pu
 
 ## Branches
 
-Small, iterative changes may be made directly on `main`, matching the repository's usual workflow. For large or risky features, use a branch such as `feature/short-name` or `fix/short-name`, then merge it into `main` when ready.
+`main` is protected: changes land through a pull request with one approval and a passing `build` check, merged with squash. Use a branch such as `feature/short-name` or `fix/short-name`. Repository admins can bypass the rule for urgent releases.
 
 ## Commits
 
@@ -37,7 +37,7 @@ Use short English Conventional Commit messages with prefixes already used in thi
 
 ## CI
 
-The CI workflow ignores Markdown files and `docs/**` for both pushes and pull requests. Documentation-only changes do not run the full build and test job. The release workflow runs only when a tag matching `v*` is pushed.
+The CI workflow ignores Markdown files and `docs/**` on pushes to `main`, so documentation-only commits there do not run the full build and test job. Pull requests always run `build`, because it is a required status check on the protected `main` branch. The release workflow runs only when a tag matching `v*` is pushed.
 
 ## Go Code
 

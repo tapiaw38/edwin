@@ -11,10 +11,6 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**.md'
-      - README.md
-      - 'docs/**'
 
 jobs:
   build:
