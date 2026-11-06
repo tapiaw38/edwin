@@ -37,7 +37,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          unformatted=$(gofmt -l .)
+          unformatted=$(find . -name '*.go' -not -path './.cache/*' -not -path './vendor/*' -exec gofmt -l {} +)
           if [ -n "$unformatted" ]; then
             printf 'These files are not gofmt-formatted:\n%s\n' "$unformatted"
             exit 1
