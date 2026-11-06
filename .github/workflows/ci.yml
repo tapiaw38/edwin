@@ -37,7 +37,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          unformatted=$(find . -name '*.go' -not -path './.cache/*' -not -path './vendor/*' -exec gofmt -l {} +)
+          unformatted=$(git ls-files -z -- '*.go' | xargs -0 -r gofmt -l)
           if [ -n "$unformatted" ]; then
             printf 'These files are not gofmt-formatted:\n%s\n' "$unformatted"
             exit 1

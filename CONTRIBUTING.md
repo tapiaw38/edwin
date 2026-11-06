@@ -32,7 +32,7 @@ See [Debug](README.md#debug) for reading GTK errors and checking integrations.
 Run these before opening a pull request. CI runs the same ones.
 
 ```bash
-gofmt -l $(find . -name '*.go' -not -path './vendor/*')   # must print nothing
+git ls-files -z -- '*.go' | xargs -0 -r gofmt -l   # must print nothing
 go vet ./...
 go test -mod=mod ./...
 ```
