@@ -103,8 +103,12 @@ func executeShortcut(window *gtk.Window, keyval uint, hardwareKeycode uint16, st
 	if state&shortcutRelevantModifiers != modifier {
 		return false
 	}
-	index, ok := shortcutNumber(keyval, hardwareKeycode)
-	if !ok || index >= len(currentResults) {
+	shortcutIndex, ok := shortcutNumber(keyval, hardwareKeycode)
+	if !ok {
+		return false
+	}
+	index := shortcutResultIndex(shortcutIndex, selectedResultIndex())
+	if index >= len(currentResults) {
 		return false
 	}
 	for resultsRenderedN <= index {
@@ -119,6 +123,20 @@ func executeShortcut(window *gtk.Window, keyval uint, hardwareKeycode uint16, st
 	selectRow(listBox, row)
 	executeSelected(window)
 	return true
+}
+
+func selectedResultIndex() int {
+	if listBox == nil || listBox.SelectedRow() == nil {
+		return -1
+	}
+	return listBox.SelectedRow().Index()
+}
+
+func shortcutResultIndex(shortcutIndex, selectedIndex int) int {
+	if selectedIndex >= 0 && shortcutIndex >= selectedIndex {
+		return shortcutIndex + 1
+	}
+	return shortcutIndex
 }
 
 func activeList() *gtk.ListBox {
