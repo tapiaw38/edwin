@@ -57,6 +57,7 @@ func renderNextResultChunk() bool {
 		row.ShowAll()
 	}
 	resultsRenderedN = end
+	updateShortcutBadges(listBox.SelectedRow())
 
 	if start == 0 {
 		selectFirstRow()

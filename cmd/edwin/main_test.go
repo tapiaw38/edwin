@@ -116,6 +116,25 @@ func TestShortcutModifier(t *testing.T) {
 	}
 }
 
+func TestShortcutResultIndex(t *testing.T) {
+	tests := []struct {
+		shortcutIndex int
+		selectedIndex int
+		want          int
+	}{
+		{0, 0, 1},
+		{0, 1, 0},
+		{1, 1, 2},
+		{8, 4, 9},
+		{3, -1, 3},
+	}
+	for _, tt := range tests {
+		if got := shortcutResultIndex(tt.shortcutIndex, tt.selectedIndex); got != tt.want {
+			t.Errorf("shortcutResultIndex(%d, %d) = %d, want %d", tt.shortcutIndex, tt.selectedIndex, got, tt.want)
+		}
+	}
+}
+
 func TestShiftModifierDoesNotToggleQuickLook(t *testing.T) {
 	for _, state := range []gdk.ModifierType{
 		gdk.ControlMask,

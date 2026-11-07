@@ -54,18 +54,17 @@ func createResultRow(r modules.Result, index int) *gtk.ListBoxRow {
 	}
 
 	hbox.PackStart(vbox, true, true, 0)
-	if index < 9 {
-		badge := gtk.NewLabel(shortcutBadgeText(config.Current.ShortcutModifier, index))
-		badge.SetName("edwin-shortcut-badge")
-		badge.SetXAlign(1)
-		badge.SetVAlign(gtk.AlignCenter)
-		badge.SetWidthChars(5)
-		hbox.PackEnd(badge, false, false, 0)
-		if shortcutBadges == nil {
-			resetShortcutBadges()
-		}
-		shortcutBadges[index] = badge
+	badge := gtk.NewLabel("")
+	badge.SetName("edwin-shortcut-badge")
+	badge.SetXAlign(1)
+	badge.SetVAlign(gtk.AlignCenter)
+	badge.SetWidthChars(5)
+	badge.Hide()
+	hbox.PackEnd(badge, false, false, 0)
+	if shortcutBadges == nil {
+		resetShortcutBadges()
 	}
+	shortcutBadges[index] = badge
 
 	eventBox := gtk.NewEventBox()
 	eventBox.SetVisibleWindow(false)
@@ -86,7 +85,16 @@ func updateShortcutBadges(selected *gtk.ListBoxRow) {
 			badge.Show()
 			continue
 		}
-		badge.SetText(shortcutBadgeText(config.Current.ShortcutModifier, index))
+		shortcutIndex := index
+		if selectedIndex >= 0 && index > selectedIndex {
+			shortcutIndex--
+		}
+		if shortcutIndex < 9 {
+			badge.SetText(shortcutBadgeText(config.Current.ShortcutModifier, shortcutIndex))
+			badge.Show()
+			continue
+		}
+		badge.Hide()
 	}
 }
 
