@@ -59,6 +59,7 @@ func createResultRow(r modules.Result, index int) *gtk.ListBoxRow {
 	badge.SetXAlign(1)
 	badge.SetVAlign(gtk.AlignCenter)
 	badge.SetWidthChars(5)
+	badge.SetNoShowAll(true)
 	badge.Hide()
 	hbox.PackEnd(badge, false, false, 0)
 	if shortcutBadges == nil {
