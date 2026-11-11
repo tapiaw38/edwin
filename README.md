@@ -187,9 +187,9 @@ File ops: `Tab` on a file opens actions. `Add to Buffer`, `Copy Path`, `Rename..
 
 Location: `~/.config/edwin/config.yaml`
 
-Color themes: `edwin` (default), `paper`, `dark`, `midnight`, `light`, and `classic`.
+Color themes: `edwin` (default), `paper`, `lilac`, `dark`, `midnight`, `light`, and `classic`.
 
-The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/edwin/assets/edwin-icon.png`). Preset color values:
+The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/edwin/assets/edwin-icon.png`). The `lilac` preset is a dark Material 3 Tonal Spot scheme generated from the seed color `#6750a4`. Preset color values:
 
 | Theme | Background RGB / alpha | Entry background | Focus border RGB | Text | Selection RGB | Description text |
 | ----- | --------------------- | ---------------- | ---------------- | ---- | ------------- | ---------------- |
@@ -199,6 +199,7 @@ The `edwin` preset is inspired by the butler in a tuxedo on the app icon (`cmd/e
 | `classic` | `238, 232, 213` / `0.97` | `rgba(0, 0, 0, 0.05)` | `38, 139, 210` | `#073642` | `38, 139, 210` | `rgba(7, 54, 66, 0.6)` |
 | `edwin` | `28, 25, 22` / `0.97` | `rgba(208, 193, 180, 0.2)` | `245, 215, 140` | `#fdf2d6` | `208, 193, 180` | `rgba(253, 242, 214, 0.62)` |
 | `paper` | `245, 244, 239` / `0.98` | `rgba(69, 57, 45, 0.08)` | `126, 76, 40` | `#24211d` | `190, 137, 87` | `rgba(69, 57, 45, 0.68)` |
+| `lilac` | `20, 18, 24` / `0.97` | `rgba(43, 41, 47, 0.92)` | `207, 189, 254` | `#e6e0e9` | `207, 189, 254` | `rgba(202, 196, 207, 0.65)` |
 
 `theme` selects a preset. Individual color fields in `config.yaml` override that preset when specified. `selection_color` is rendered with 0.42 alpha. Every preset provides `focus_border_color`; it sets the 1px border on `#edwin-entry:focus`.
 
