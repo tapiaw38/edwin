@@ -6,9 +6,15 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-11
+
 ### Added
 
 - `lilac` color theme, a dark Material 3 Tonal Spot scheme seeded from `#6750a4`.
+
+### Fixed
+
+- Avoid GTK warnings while rendering shortcut badges.
 
 ## [0.9.0] - 2026-11-07
 
