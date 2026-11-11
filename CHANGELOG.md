@@ -6,6 +6,10 @@ This project follows [Semantic Versioning](https://semver.org/) and the [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- `lilac` color theme, a dark Material 3 Tonal Spot scheme seeded from `#6750a4`.
+
 ## [0.9.0] - 2026-11-07
 
 ### Added
