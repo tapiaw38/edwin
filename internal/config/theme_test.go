@@ -23,6 +23,56 @@ func TestEdwinThemeIsDefault(t *testing.T) {
 	}
 }
 
+func TestLilacPreset(t *testing.T) {
+	preset, ok := ColorPresets["lilac"]
+	if !ok {
+		t.Fatal("lilac preset is not registered")
+	}
+
+	want := ColorPreset{
+		BackgroundColor:  "20, 18, 24",
+		BackgroundAlpha:  0.97,
+		TextColor:        "#e6e0e9",
+		SelectionColor:   "207, 189, 254",
+		FocusBorderColor: "207, 189, 254",
+		EntryBackground:  "rgba(43, 41, 47, 0.92)",
+		DescColor:        "rgba(202, 196, 207, 0.65)",
+	}
+	if preset != want {
+		t.Fatalf("lilac preset = %+v, want %+v", preset, want)
+	}
+}
+
+func TestLilacPresetAppliesToCSS(t *testing.T) {
+	previous := Current
+	t.Cleanup(func() { Current = previous })
+
+	Current = defaultConfig
+	preset := ColorPresets["lilac"]
+	Current.Theme = "lilac"
+	Current.BackgroundColor = preset.BackgroundColor
+	Current.BackgroundAlpha = preset.BackgroundAlpha
+	Current.TextColor = preset.TextColor
+	Current.SelectionColor = preset.SelectionColor
+	Current.FocusBorderColor = preset.FocusBorderColor
+	Current.EntryBackground = preset.EntryBackground
+	Current.DescColor = preset.DescColor
+
+	css := GetCSS()
+	for _, want := range []string{
+		"@define-color edwin-bg rgba(20, 18, 24, 0.97);",
+		"@define-color edwin-text #e6e0e9;",
+		"@define-color edwin-selection rgba(207, 189, 254, 0.3);",
+		"@define-color edwin-focus-border rgba(207, 189, 254, 1);",
+		"@define-color edwin-entry-bg rgba(43, 41, 47, 0.92);",
+		"@define-color edwin-desc-color rgba(202, 196, 207, 0.65);",
+	} {
+		if !strings.Contains(css, want) {
+			t.Fatalf("CSS is missing %q", want)
+		}
+	}
+}
+
 func TestGetCSSUsesFocusBorderColor(t *testing.T) {
 	original := Current
 	Current = defaultConfig

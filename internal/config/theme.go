@@ -84,6 +84,15 @@ var ColorPresets = map[string]ColorPreset{
 		EntryBackground:  "rgba(69, 57, 45, 0.08)",
 		DescColor:        "rgba(69, 57, 45, 0.68)",
 	},
+	"lilac": {
+		BackgroundColor:  "20, 18, 24",
+		BackgroundAlpha:  0.97,
+		TextColor:        "#e6e0e9",
+		SelectionColor:   "207, 189, 254",
+		FocusBorderColor: "207, 189, 254",
+		EntryBackground:  "rgba(43, 41, 47, 0.92)",
+		DescColor:        "rgba(202, 196, 207, 0.65)",
+	},
 }
 
 const StaticThemeCSS = `
