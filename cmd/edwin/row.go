@@ -108,7 +108,15 @@ func resultIcon(r modules.Result) gtk.Widgetter {
 		icon.SetYAlign(0.5)
 		return icon
 	}
-	return loadIcon(r.Icon, config.Current.IconSize)
+	if icon := loadIcon(r.Icon, config.Current.IconSize); icon != nil {
+		return icon
+	}
+	if icon := loadIcon(fallbackIconName, config.Current.IconSize); icon != nil {
+		return icon
+	}
+	placeholder := gtk.NewImage()
+	placeholder.SetSizeRequest(config.Current.IconSize, config.Current.IconSize)
+	return placeholder
 }
 
 type dragSourceWidget interface {
@@ -165,6 +173,8 @@ func absolutePath(path string) string {
 func fileURI(path string) string {
 	return (&url.URL{Scheme: "file", Path: filepath.ToSlash(path)}).String()
 }
+
+const fallbackIconName = "application-x-executable"
 
 func loadIcon(iconName string, size int) *gtk.Image {
 	if iconName == "" {
